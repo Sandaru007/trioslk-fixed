@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom';
-import './Navbar.css'; // Importing your custom styles
+import './Navbar.css';
 
 const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white py-3 border-bottom">
       <div className="container d-flex justify-content-between align-items-center">
         
-        {/* LEFT: Brand Logo */}
-        <Link className="navbar-brand fw-bold fs-3 brand-text" to="/">
+        {/* Logo */}
+        <Link className="navbar-brand fw-bold fs-3" to="/">
           TRIOSLK
         </Link>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile Button */}
         <button 
           className="navbar-toggler border-0 shadow-none" 
           type="button" 
@@ -21,31 +21,29 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Navigation Collapse Wrapper */}
+        {/* Menu */}
         <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
           
-          {/* CENTER: Pill-shaped Navigation Links */}
-          <ul className="navbar-nav mx-auto nav-pill-container px-4 py-2 rounded-pill mt-3 mt-lg-0">
+          <ul className="navbar-nav mx-auto">
             <li className="nav-item px-2">
-              <Link className="nav-link text-dark fw-medium" to="/">Home</Link>
+              <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className="nav-item px-2">
-              <Link className="nav-link text-dark fw-medium" to="/about">About Us</Link>
+              <Link className="nav-link" to="/about">About</Link>
             </li>
             <li className="nav-item px-2">
-              <Link className="nav-link text-dark fw-medium" to="/events">Events</Link>
+              <Link className="nav-link" to="/courses">Courses</Link>
             </li>
             <li className="nav-item px-2">
-              <Link className="nav-link text-dark fw-medium" to="/courses">Courses</Link>
+              <Link className="nav-link" to="/events">Events</Link>
             </li>
           </ul>
-          
-          {/* RIGHT: Action Buttons (Login & Register) */}
-          <div className="d-flex align-items-center mt-3 mt-lg-0 mobile-gap">
-            <Link to="/login" className="btn btn-login me-2 px-4 py-2">
+
+          <div>
+            <Link to="/login" className="btn btn-outline-dark me-2">
               Login
             </Link>
-            <Link to="/register" className="btn btn-theme-red rounded-pill px-4 py-2 fw-medium">
+            <Link to="/register" className="btn btn-danger">
               Register
             </Link>
           </div>
