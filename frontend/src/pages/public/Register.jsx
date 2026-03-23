@@ -33,7 +33,7 @@ const Register = () => {
 
     try {
       // 2. Send the data to our new backend route
-      const response = await api.post('/auth/login', formData);
+      const response = await api.post('/auth/register/student', formData);
       
       if (response.data.success) {
         setStatus({ loading: false, error: '', success: response.data.message });

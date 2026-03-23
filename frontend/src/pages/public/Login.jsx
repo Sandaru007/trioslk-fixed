@@ -14,7 +14,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+    console.log("Attempting login with:", credentials);
     try {
       const { data } = await api.post('/auth/login', credentials);
       // Store token in browser storage
