@@ -1,0 +1,79 @@
+.footer-section {
+  background-color: var(--trioslk-dark-blue); /* Updated */
+  color: #d1d5db;
+  font-size: 0.95rem;
+}
+
+.footer-brand {
+  color: white;
+  letter-spacing: 1px;
+}
+
+.footer-heading {
+  color: white;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.footer-text {
+  line-height: 1.6;
+}
+
+/* Social Icons Styling */
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  background-color: var(--trioslk-red); /* Updated */
+  transform: translateY(-3px);
+}
+
+/* Quick Links Styling */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+  color: #d1d5db;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--trioslk-red); /* Updated to turn red on hover */
+  padding-left: 6px; /* Increased the nudge effect slightly */
+}
+
+/* Contact Info Styling */
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.contact-item i {
+  color: var(--trioslk-red); /* Updated */
+  font-size: 1.1rem;
+  margin-right: 12px;
+  margin-top: 2px;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

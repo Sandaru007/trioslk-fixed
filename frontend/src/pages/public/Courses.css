@@ -1,0 +1,34 @@
+
+/* Card Styling */
+.course-card {
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Dropdown Arrow Animation */
+.expand-icon {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+/* When the Bootstrap collapse is open, we rotate the arrow 180 degrees */
+.collapse-btn[aria-expanded="true"] .expand-icon {
+  transform: rotate(180deg);
+}
+
+.course-duration {
+  background-color: rgba(122, 27, 41, 0.1);
+  color: var(--trioslk-red);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}

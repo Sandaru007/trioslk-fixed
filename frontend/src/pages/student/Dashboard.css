@@ -1,0 +1,113 @@
+
+.student-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Matches our global light gray */
+  font-family: 'Inter', sans-serif;
+}
+
+
+.student-sidebar {
+  width: 260px;
+  background-color: #fff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.student-sidebar-logo {
+  padding: 30px 20px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.student-sidebar-logo h2 {
+  font-weight: 800;
+  color: var(--trioslk-maroon, #7a1b29);
+  margin: 0;
+}
+
+.student-sidebar-logo span {
+  color: #111827;
+}
+
+.student-nav {
+  padding: 20px 10px;
+  flex-grow: 1;
+}
+
+.student-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #4b5563;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 5px;
+}
+
+.student-nav-btn:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* The active state matching the Lecturer/Admin maroon */
+.student-nav-btn.active {
+  background-color: rgba(122, 27, 41, 0.1);
+  color: var(--trioslk-maroon, #7a1b29);
+  font-weight: 600;
+}
+
+/* ================= Main Area ================= */
+.student-main {
+  flex-grow: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+/* ================= Top Header ================= */
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  background: #fff;
+  padding: 15px 30px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.student-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.student-mini-profile {
+  width: 40px;
+  height: 40px;
+  background-color: var(--trioslk-maroon, #7a1b29);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}

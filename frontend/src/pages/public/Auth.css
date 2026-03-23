@@ -1,0 +1,59 @@
+/* Auth Page Background */
+.auth-page {
+  background-color: var(--trioslk-light-gray);
+  min-height: calc(100vh - 80px); /* Adjusts for navbar height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 15px;
+}
+
+/* Auth Card Styling */
+.auth-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Customizing the inputs to look modern */
+.auth-input {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.auth-input:focus {
+  background-color: white;
+  border-color: var(--trioslk-red);
+  box-shadow: 0 0 0 4px rgba(198, 58, 49, 0.1);
+}
+
+.auth-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.forgot-password {
+  font-size: 0.85rem;
+  color: var(--trioslk-red);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}

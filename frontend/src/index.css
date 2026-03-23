@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* GLOBAL COLOR PALETTE */
+:root {
+  --trioslk-red: #C63A31; /* The vibrant red from your screenshot */
+  --trioslk-dark-blue: #111827; /* The dark blue for the footer */
+  --trioslk-light-gray: #f4f5f7;
+}
+
+/* GLOBAL THEME BUTTONS */
+.btn-theme-red {
+  background-color: var(--trioslk-red);
+  border-color: var(--trioslk-red);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-theme-red:hover {
+  background-color: #a8322a; /* Slightly darker on hover */
+  border-color: #a8322a;
+  color: white;
+  transform: translateY(-2px); /* Lifts the button up slightly */
+  box-shadow: 0 6px 15px rgba(198, 58, 49, 0.3); /* Adds a red glowing shadow */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8f9fa; /* A very light gray background */
+}
+
+/* GLOBAL IMAGE HEADER STYLES */
+.page-header-bg {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 50vh; /* Makes the header nicely tall */
+  display: flex;
+  align-items: center;
+  padding: 80px 0;
+}
+
+/* This gradient is transparent on the left, and dark on the right where text is */
+.header-right-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(17, 24, 39, 0.1) 0%, rgba(17, 24, 39, 0.85) 100%);
+  z-index: 1;
+}
+
+.header-content {
+  position: relative;
+  z-index: 2;
+}

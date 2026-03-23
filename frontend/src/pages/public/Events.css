@@ -1,0 +1,45 @@
+/* Event Status Badges */
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-new {
+  background-color: var(--trioslk-red);
+  color: white;
+}
+
+.status-open {
+  background-color: #198754; /* Bootstrap Success Green */
+  color: white;
+}
+
+.status-upcoming {
+  background-color: #6c757d; /* Bootstrap Secondary Gray */
+  color: white;
+}
+
+/* Reusing the modern card and expand icon styles */
+.modern-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modern-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.collapse-btn[aria-expanded="true"] .expand-icon {
+  transform: rotate(180deg);
+}
