@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api'; // <-- 1. IMPORT YOUR NEW API UTILITY
+import api from '../../services/api'; 
 import { Link } from 'react-router-dom';
 import homeImg from '../../assets/images/hero-img.jpg';
 import volunteerImpactImg from '../../assets/images/volunteer.jpg';

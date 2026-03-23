@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Student = require('../models/Student');
 const { 
   getStudentCount, 
   getAllStudents, 
@@ -7,8 +8,22 @@ const {
 } = require('../controllers/studentController');
 
 // Define the endpoints
-router.get('/count', getStudentCount); // http://localhost:8000/api/students/count
-router.get('/', getAllStudents);       // http://localhost:8000/api/students
+router.get('/count', getStudentCount); 
+router.get('/', getAllStudents);       
 router.put('/:id/status', updateStudentStatus);
+
+// Delete a student
+router.delete('/:id', async (req, res) => {
+  try {
+    const student = await Student.findByIdAndDelete(req.params.id);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.json({ message: "Student deleted successfully" });
+  } catch (err) {
+    console.error("Delete Student Error:", err);
+    res.status(500).json({ message: "Server Error during deletion" });
+  }
+});
 
 module.exports = router;

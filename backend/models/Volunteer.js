@@ -20,7 +20,9 @@ const volunteerSchema = new mongoose.Schema({
   
   // Preferences
   primaryArea: { type: String, required: true },
-  availability: { type: String, required: true }
+  availability: { type: String, required: true },
+
+  status: { type: String, default: 'Pending', enum: ['Pending', 'Active', 'Rejected'] }
 }, { 
   timestamps: true // Automatically adds createdAt and updatedAt dates
 });

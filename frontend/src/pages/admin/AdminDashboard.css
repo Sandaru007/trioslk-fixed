@@ -201,3 +201,43 @@
     margin-top: 20px;
 }
 
+/* Update these parts in your AdminDashboard.css */
+
+.notification-badge {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #a3aed0;
+    transition: 0.3s;
+}
+
+.notification-badge:hover {
+    color: #4318ff;
+}
+
+.badge-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ee5d50; /* Red alert color */
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    padding: 2px;
+}
+
+/* Ensure the profile section looks balanced */
+.header-profile {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+

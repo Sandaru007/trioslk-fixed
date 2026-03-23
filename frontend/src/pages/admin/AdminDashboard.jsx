@@ -1,21 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, Calendar, BookOpen, CreditCard, 
-  MessageSquare, LayoutDashboard, LogOut, Search, Bell,Briefcase 
+  MessageSquare, LayoutDashboard, LogOut, Search, Bell, Briefcase 
 } from 'lucide-react';
 import './AdminDashboard.css';
+import api from '../../services/api';
 
 // Import sub-components
 import EmployeeManagement from './EmployeeManagement';
 import UserManagement from './UserManagement';
 import AdminOverview from './AdminOverview';
-// Import the sub-components (Assuming these files exist in the same folder)
-// import UserManagement from './UserManagement';
 import EventManagement from './EventManagement';
 
 const AdminDashboard = () => {
-  // Set this to 'overview' so it starts on the Dashboard Home
   const [activeTab, setActiveTab] = useState('overview');
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // 1. Logic to fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await api.get('/volunteers');
+      // Only count those with 'Pending' status
+      const pending = (data || []).filter(v => v.status === 'Pending').length;
+      setPendingCount(pending);
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+    }
+  };
+
+  // 2. THE FIX: Initialize and set interval inside useEffect
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchNotifications();
+
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -64,7 +87,14 @@ const AdminDashboard = () => {
             <input type="text" placeholder="Search anything..." />
           </div>
           <div className="header-profile">
-            <Bell size={20} className="icon-badge" />
+            {/* NOTIFICATION BADGE SECTION */}
+            <div className="notification-badge">
+              <Bell size={20} className="icon-badge" />
+              {pendingCount > 0 && (
+                <span className="badge-count">{pendingCount}</span>
+              )}
+            </div>
+            
             <div className="user-info">
               <p>Admin Name</p>
               <span>Super Admin</span>
@@ -73,23 +103,12 @@ const AdminDashboard = () => {
           </div>
         </header>
 
-        {/* --- FIXED: ONLY ONE MAIN TAG --- */}
         <main className="admin-content">
-          {/* Tab 1: Overview Dashboard */}
           {activeTab === 'overview' && <AdminOverview />}
-
-          {/* Tab 2: User Management (Udari) */}
           {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'employees' && <EmployeeManagement />}
+          {activeTab === 'events' && <EventManagement />}
 
-          {/* Tab 3: Employee Management (Methupa) */}
-  {activeTab === 'employees' && <EmployeeManagement />}
-
-          {/* Tab 3: Event Management (Sandaru) */}
-          {activeTab === 'events' && (
-            <EventManagement />
-          )}
-
-          {/* Placeholder for other teammates */}
           {['sessions', 'finance', 'feedback'].includes(activeTab) && (
             <div className="view-placeholder">
               <h3>Section Under Construction</h3>
