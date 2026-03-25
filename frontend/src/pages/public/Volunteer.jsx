@@ -9,7 +9,6 @@ import {
   validateNIC,
   validateTextField,
   validateSelect,
-  validateRequired,
   validateVolunteerForm,
   hasErrors
 } from '../../utils/validations';
