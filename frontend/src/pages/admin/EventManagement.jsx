@@ -10,7 +10,7 @@ const EventManagement = () => {
   const [editingEventId, setEditingEventId] = useState(null);
   const [editingCourseId, setEditingCourseId] = useState(null);
 
-  const initialEventForm = { title: '', description: '', type: 'Online', status: 'Upcoming', imageUrl: '' };
+  const initialEventForm = { eventId: '', title: '', description: '', type: 'Online', status: 'Upcoming', imageFile: null };
   const initialCourseForm = { courseCode: '',title: '', duration: '3 Months', shortDesc: '', fullDesc: '', icon: 'bi-book', imageUrl: '', status: 'Active' };
   
   const [eventForm, setEventForm] = useState(initialEventForm);
@@ -41,11 +41,22 @@ const EventManagement = () => {
   const handleEventSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('eventId', eventForm.eventId);
+      formData.append('title', eventForm.title);
+      formData.append('description', eventForm.description);
+      formData.append('type', eventForm.type);
+      formData.append('status', eventForm.status);
+      if (eventForm.imageFile) {
+        formData.append('imageFile', eventForm.imageFile);
+      }
+
       if (editingEventId) {
-        await api.put(`/events/${editingEventId}`, eventForm); // <-- 4. CLEANER URL
+        await api.put(`/events/${editingEventId}`, formData);
         alert('Event updated successfully!');
       } else {
-        await api.post('/events', eventForm); // <-- 5. CLEANER URL
+        await api.post('/events', formData);
         alert('Event created successfully!');
       }
       setEventForm(initialEventForm);
@@ -136,9 +147,14 @@ const EventManagement = () => {
             </div>
             
             <form onSubmit={handleEventSubmit} style={{ display: 'grid', gap: '15px' }}>
+              <input type="text" placeholder="Event ID (e.g., EVT-1001)" value={eventForm.eventId} onChange={(e) => setEventForm({...eventForm, eventId: e.target.value})} required style={inputStyle} />
               <input type="text" placeholder="Event Title" value={eventForm.title} onChange={(e) => setEventForm({...eventForm, title: e.target.value})} required style={inputStyle} />
               <textarea placeholder="Event Description" value={eventForm.description} onChange={(e) => setEventForm({...eventForm, description: e.target.value})} required rows="3" style={inputStyle} />
-              <input type="url" placeholder="Image URL" value={eventForm.imageUrl} onChange={(e) => setEventForm({...eventForm, imageUrl: e.target.value})} required style={inputStyle} />
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', fontWeight: '500' }}>Event Image</label>
+                <input type="file" accept="image/*" onChange={(e) => setEventForm({...eventForm, imageFile: e.target.files[0]})} required={!editingEventId} style={{...inputStyle, padding: '10px'}} />
+                {eventForm.imageFile && <p style={{ fontSize: '12px', color: '#4318ff', marginTop: '5px' }}>Selected: {eventForm.imageFile.name}</p>}
+              </div>
               <div style={{ display: 'flex', gap: '15px' }}>
                 <select value={eventForm.type} onChange={(e) => setEventForm({...eventForm, type: e.target.value})} style={inputStyle}>
                   <option value="Online">Online</option>
@@ -163,9 +179,9 @@ const EventManagement = () => {
               {events.map((event) => (
                 <div key={event._id} style={cardStyle}>
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <img src={event.imageUrl} alt={event.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <img src={event.imageFile} alt={event.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
                     <div>
-                      <h4 style={{ margin: '0 0 5px 0' }}>{event.title}</h4>
+                      <h4 style={{ margin: '0 0 5px 0' }}>{event.eventId} - {event.title}</h4>
                       <span style={badgeStyle}>{event.status}</span>
                     </div>
                   </div>
