@@ -189,7 +189,7 @@ const loginUser = async (req, res) => {
     }
 
     // 2. Check Student
-    const student = await Student.findOne({ studentId: username });
+    const student = await Student.findOne({ studentId: username }).select('+password');
     if (student && (await student.matchPassword(password))) {
       return res.json({
         _id: student._id,
