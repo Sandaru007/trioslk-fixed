@@ -36,3 +36,64 @@
   color: #4b5563;
   font-size: 0.9rem;
 }
+
+/* Form Validation Styling */
+.form-hint {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.form-success {
+  color: #10b981;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.invalid-feedback {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  display: block;
+}
+
+/* Valid/Invalid Input Styling */
+.form-control.is-valid,
+.form-control.is-valid {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.02);
+}
+
+.form-control.is-valid:focus,
+.form-control.is-valid:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
+}
+
+.form-control.is-invalid,
+.form-control.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.02);
+}
+
+.form-control.is-invalid:focus,
+.form-control.is-invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+.form-select.is-valid,
+.form-select.is-invalid {
+  padding-right: 1.75rem;
+  background-size: 16px 12px;
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+}
+
+/* Field guidance container */
+.field-guidance {
+  min-height: 20px;
+  margin-top: 6px;
+}
