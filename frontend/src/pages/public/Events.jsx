@@ -50,7 +50,7 @@ const Events = () => {
               <div key={event._id} className="col-lg-8" data-aos="fade-up" data-aos-delay={index * 100}>
                 <div className="card modern-card border-0 shadow-sm flex-md-row overflow-hidden">
                   <div className="position-relative d-none d-md-block" style={{ width: '250px', flexShrink: 0 }}>
-                    <img src={event.imageUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={event.imageFile} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-25"></div>
                     <span className={`status-badge position-absolute top-0 start-0 m-3 shadow-sm ${getStatusClass(event.status)}`}>{event.status}</span>
                   </div>

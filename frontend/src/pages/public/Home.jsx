@@ -220,7 +220,7 @@ const Home = () => {
                   <div key={event._id} className="col-md-6" data-aos="fade-up" data-aos-delay={index * 200}>
                     <div className="card border-0 shadow-sm modern-card d-flex flex-row overflow-hidden h-100">
                       <div style={{ width: '150px', flexShrink: 0, position: 'relative' }}>
-                        <img src={event.imageUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={event.imageFile} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-25"></div>
                         <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded ${badge.bg}`} style={{ fontSize: '0.7rem' }}>{badge.text}</div>
                       </div>
