@@ -10,8 +10,13 @@ const registrationSchema = new mongoose.Schema({
   // Link to the Student using their STU-XXXX ID
   studentCustomId: { 
     type: String, 
-    required: true,
-    ref: 'Student'
+    required: true
+  },
+
+  registrationType: { 
+    type: String, 
+    required: true, 
+    enum: ['student', 'guest'] 
   },
   // Capturing these at the time of registration for quick access
   studentName: String,
@@ -20,6 +25,6 @@ const registrationSchema = new mongoose.Schema({
   registrationDate: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-registrationSchema.index({ eventCustomId: 1, studentCustomId: 1 }, { unique: true });
+registrationSchema.index({ eventCustomId: 1, studentEmail: 1 }, { unique: true });
 
 module.exports = mongoose.model('Registration', registrationSchema);
