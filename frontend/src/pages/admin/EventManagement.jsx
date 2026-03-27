@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Trash2, PlusCircle, Edit, Calendar, BookOpen, XCircle, Users, Eye } from 'lucide-react';
+import { Trash2, PlusCircle, Edit, Calendar, BookOpen, XCircle, Users, CheckCircle, Clock } from 'lucide-react';
 import './AdminDashboard.css';
 
 const EventManagement = () => {
@@ -57,6 +57,16 @@ const EventManagement = () => {
     fetchCourses();
   }, []);
 
+  // Quick Action: Mark as Completed
+  const handleMarkCompleted = async (event) => {
+    if (window.confirm(`Are you sure you want to complete "${event.title}"? It will be hidden from the public website.`)) {
+      try {
+        await api.put(`/events/${event._id}`, { status: 'Completed' });
+        fetchEvents();
+      } catch (error) { console.error('Status Update Error:', error); }
+    }
+  };
+
   const handleEventSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -107,7 +117,7 @@ const EventManagement = () => {
   };
 
   const handleDeleteEvent = async (id) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm('WARNING: Deleting this event will also delete ALL registered student data for it. Proceed?')) {
       try {
         await api.delete(`/events/${id}`);
         fetchEvents();
@@ -123,6 +133,10 @@ const EventManagement = () => {
       } catch (error) { console.error('Delete Error:', error); }
     }
   };
+
+  // Filter events by status for a cleaner UI
+  const liveEvents = events.filter(e => e.status !== 'Completed');
+  const archivedEvents = events.filter(e => e.status === 'Completed');
 
   const startEditingEvent = (event) => {
     setEditingEventId(event._id);
@@ -157,60 +171,98 @@ const EventManagement = () => {
 
       {activeTab === 'events' && (
         <>
-          {/* Create/Edit Form */}
           <div className="view-placeholder" style={{ textAlign: 'left', marginBottom: '30px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {editingEventId ? <Edit size={24} color="#4318ff" /> : <PlusCircle size={24} color="#4318ff" />}
-                {editingEventId ? 'Update Event Details' : 'Create New Event'}
-              </h3>
-              {editingEventId && <button onClick={cancelEdit} style={cancelButtonStyle}><XCircle size={18} /> Cancel</button>}
-            </div>
+            <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {editingEventId ? <Edit size={24} color="#4318ff" /> : <PlusCircle size={24} color="#4318ff" />}
+              {editingEventId ? 'Modify Event' : 'Create New Event'}
+            </h3>
             
             <form onSubmit={handleEventSubmit} style={{ display: 'grid', gap: '15px' }}>
-              <input type="text" placeholder="Event ID (e.g., EVT-1001)" value={eventForm.eventId} onChange={(e) => setEventForm({...eventForm, eventId: e.target.value})} required style={inputStyle} />
-              <input type="text" placeholder="Event Title" value={eventForm.title} onChange={(e) => setEventForm({...eventForm, title: e.target.value})} required style={inputStyle} />
-              <textarea placeholder="Event Description" value={eventForm.description} onChange={(e) => setEventForm({...eventForm, description: e.target.value})} required rows="3" style={inputStyle} />
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px', fontWeight: '500' }}>Event Image</label>
-                <input type="file" accept="image/*" onChange={(e) => setEventForm({...eventForm, imageFile: e.target.files[0]})} required={!editingEventId} style={{...inputStyle, padding: '10px'}} />
-                {eventForm.imageFile && <p style={{ fontSize: '12px', color: '#4318ff', marginTop: '5px' }}>Selected: {eventForm.imageFile.name}</p>}
-              </div>
               <div style={{ display: 'flex', gap: '15px' }}>
-                <select value={eventForm.type} onChange={(e) => setEventForm({...eventForm, type: e.target.value})} style={inputStyle}>
-                  <option value="Online">Online</option>
-                  <option value="Physical">Physical</option>
-                </select>
-                <select value={eventForm.status} onChange={(e) => setEventForm({...eventForm, status: e.target.value})} style={inputStyle}>
-                  <option value="Upcoming">Upcoming</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                <input type="text" placeholder="Event ID (EVT-1001)" value={eventForm.eventId} onChange={(e) => setEventForm({...eventForm, eventId: e.target.value})} required style={{...inputStyle, flex: 1}} />
+                <input type="text" placeholder="Title" value={eventForm.title} onChange={(e) => setEventForm({...eventForm, title: e.target.value})} required style={{...inputStyle, flex: 2}} />
               </div>
-              <button type="submit" style={editingEventId ? updateButtonStyle : buttonStyle}>
-                {editingEventId ? 'Save Changes' : 'Publish Event'}
-              </button>
+              <textarea placeholder="Description" value={eventForm.description} onChange={(e) => setEventForm({...eventForm, description: e.target.value})} required rows="3" style={inputStyle} />
+              
+              <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1 }}>
+                  <label className="small fw-bold text-muted">Status</label>
+                  <select value={eventForm.status} onChange={(e) => setEventForm({...eventForm, status: e.target.value})} style={inputStyle}>
+                    <option value="Upcoming">Upcoming (Cards Only)</option>
+                    <option value="Ongoing">Ongoing (Registration Open)</option>
+                    <option value="Extended">Extended (Late Registration)</option>
+                    <option value="Completed">Completed (Archive)</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="small fw-bold text-muted">Type</label>
+                  <select value={eventForm.type} onChange={(e) => setEventForm({...eventForm, type: e.target.value})} style={inputStyle}>
+                    <option value="Online">Online</option>
+                    <option value="Physical">Physical</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="small fw-bold text-muted">Image Upload</label>
+                  <input type="file" onChange={(e) => setEventForm({...eventForm, imageFile: e.target.files[0]})} required={!editingEventId} style={{...inputStyle, padding: '10px'}} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="submit" style={editingEventId ? updateButtonStyle : buttonStyle}>
+                  {editingEventId ? 'Update Event' : 'Publish Event'}
+                </button>
+                {editingEventId && <button type="button" onClick={cancelEdit} style={cancelButtonStyle}>Cancel</button>}
+              </div>
             </form>
           </div>
 
-          {/* List Display */}
-          <div className="view-placeholder" style={{ textAlign: 'left' }}>
-            <h3 style={{ marginBottom: '20px' }}>Live Events</h3>
+          {/* SECTION: LIVE EVENTS */}
+          <div className="view-placeholder" style={{ textAlign: 'left', marginBottom: '30px' }}>
+            <h4 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#0369a1' }}>
+              <Clock size={20} /> Active & Upcoming Events
+            </h4>
             <div style={{ display: 'grid', gap: '15px' }}>
-              {events.length === 0 && <p>No events found.</p>}
-              {events.map((event) => (
+              {liveEvents.length === 0 && <p className="text-muted">No active events.</p>}
+              {liveEvents.map((event) => (
                 <div key={event._id} style={cardStyle}>
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <img src={event.imageFile} alt={event.title} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <img src={event.imageFile} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
                     <div>
                       <h4 style={{ margin: '0 0 5px 0' }}>{event.eventId} - {event.title}</h4>
-                      <span style={badgeStyle}>{event.status}</span>
+                      <span style={{ ...badgeStyle, background: event.status === 'Upcoming' ? '#fff7ed' : '#f0fdf4', color: event.status === 'Upcoming' ? '#9a3412' : '#166534' }}>
+                        {event.status}
+                      </span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => handleViewRegistrants(event)} style={viewButtonStyle} title="View Attendees"><Users size={18} /></button>
-                    <button onClick={() => startEditingEvent(event)} style={editButtonStyle} title="Edit"><Edit size={18} /></button>
-                    <button onClick={() => handleDeleteEvent(event._id)} style={deleteButtonStyle} title="Delete"><Trash2 size={18} /></button>
+                    <button onClick={() => handleViewRegistrants(event)} style={viewButtonStyle} title="Registrants"><Users size={18} /></button>
+                    <button onClick={() => handleMarkCompleted(event)} style={completeButtonStyle} title="Mark as Completed"><CheckCircle size={18} /></button>
+                    <button onClick={() => startEditingEvent(event)} style={editButtonStyle}><Edit size={18} /></button>
+                    <button onClick={() => handleDeleteEvent(event._id)} style={deleteButtonStyle}><Trash2 size={18} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* List Display */}
+          <div className="view-placeholder" style={{ textAlign: 'left', opacity: 0.8 }}>
+            <h4 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: '#64748b' }}>
+              <CheckCircle size={20} /> Completed History
+            </h4>
+            <div style={{ display: 'grid', gap: '15px' }}>
+              {archivedEvents.map((event) => (
+                <div key={event._id} style={{...cardStyle, borderLeft: '5px solid #64748b'}}>
+                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <img src={event.imageFile} alt="" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', filter: 'grayscale(100%)' }} />
+                    <div>
+                      <h5 style={{ margin: '0 0 5px 0', color: '#64748b' }}>{event.eventId} - {event.title}</h5>
+                      <span style={{ fontSize: '11px', background: '#e2e8f0', padding: '2px 8px', borderRadius: '10px' }}>Finished</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => handleViewRegistrants(event)} style={viewButtonStyle}><Users size={18} /></button>
+                    <button onClick={() => handleDeleteEvent(event._id)} style={deleteButtonStyle}><Trash2 size={18} /></button>
                   </div>
                 </div>
               ))}
@@ -221,41 +273,36 @@ const EventManagement = () => {
 
       {/* REGISTRANTS MODAL */}
       {showRegistrantsModal && (
-        <div className="custom-modal-overlay" style={modalOverlayStyle}>
-          <div className="custom-modal-content" style={modalContentStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-              <h4 style={{ margin: 0, fontWeight: 'bold' }}>
-                Attendees for <span style={{ color: '#4318ff' }}>{viewingEvent?.eventId}</span>
-              </h4>
-              <button onClick={() => setShowRegistrantsModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><XCircle size={24} /></button>
+        <div style={modalOverlayStyle}>
+          <div style={modalContentStyle}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <h4 className="fw-bold">Attendees: {viewingEvent?.title}</h4>
+              <button onClick={() => setShowRegistrantsModal(false)} style={{ border: 'none', background: 'none' }}><XCircle size={24} /></button>
             </div>
-            
-            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ textAlign: 'left', background: '#f8fafc', fontSize: '13px', color: '#64748b' }}>
-                    <th style={thStyle}>Student ID</th>
-                    <th style={thStyle}>Name</th>
-                    <th style={thStyle}>Email</th>
-                    <th style={thStyle}>Phone</th>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', background: '#f1f5f9', fontSize: '12px' }}>
+                  <th style={thStyle}>Type</th>
+                  <th style={thStyle}>ID / Identifier</th>
+                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Contact</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registrants.map((reg) => (
+                  <tr key={reg._id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={tdStyle}>
+                      <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: reg.registrationType === 'student' ? '#dcfce7' : '#f1f5f9', color: reg.registrationType === 'student' ? '#166534' : '#64748b', fontWeight: 'bold' }}>
+                        {reg.registrationType.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>{reg.studentCustomId}</td>
+                    <td style={tdStyle} className="fw-bold">{reg.studentName}</td>
+                    <td style={tdStyle} className="small">{reg.studentEmail}<br/>{reg.studentPhone}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {registrants.length === 0 ? (
-                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>No registrations yet.</td></tr>
-                  ) : (
-                    registrants.map((reg) => (
-                      <tr key={reg._id} style={{ borderBottom: '1px solid #f1f5f9', fontSize: '14px' }}>
-                        <td style={tdStyle}>{reg.studentCustomId}</td>
-                        <td style={tdStyle}>{reg.studentName}</td>
-                        <td style={tdStyle}>{reg.studentEmail}</td>
-                        <td style={tdStyle}>{reg.studentPhone}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -332,7 +379,7 @@ const deleteButtonStyle = { background: '#ffe4e6', color: '#e11d48', border: 'no
 const badgeStyle = { fontSize: '12px', background: '#dcfce7', color: '#166534', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold' };
 const activeTabStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'transparent', border: 'none', borderBottom: '3px solid #4318ff', color: '#4318ff', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' };
 const inactiveTabStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', background: 'transparent', border: 'none', color: '#64748b', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px' };
-
+const completeButtonStyle = { background: '#ecfdf5', color: '#059669', border: 'none', padding: '10px', borderRadius: '8px', cursor: 'pointer' };
 const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
 const modalContentStyle = { background: '#fff', padding: '30px', borderRadius: '16px', width: '90%', maxWidth: '750px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' };
 const thStyle = { padding: '12px', borderBottom: '1px solid #e2e8f0' };

@@ -114,25 +114,36 @@ const Home = () => {
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const eventRes = await api.get('/events'); // <-- 2. CLEANER URL
+        // IMPORTANT: Use /public endpoint to exclude 'Completed' events
+        const eventRes = await api.get('/events/public'); 
+        // We only show the 2 most recent active events on the home page
         setRecentEvents(eventRes.data.slice(0, 2)); 
-      } catch (error) { console.error('Error fetching recent events:', error); } 
-      finally { setLoadingEvents(false); }
+      } catch (error) { 
+        console.error('Error fetching recent events:', error); 
+      } finally { 
+        setLoadingEvents(false); 
+      }
 
       try {
-        const courseRes = await api.get('/courses'); // <-- 3. CLEANER URL
+        const courseRes = await api.get('/courses');
         setFeaturedCourses(courseRes.data.slice(0, 3)); 
-      } catch (error) { console.error('Error fetching featured courses:', error); } 
-      finally { setLoadingCourses(false); }
+      } catch (error) { 
+        console.error('Error fetching featured courses:', error); 
+      } finally { 
+        setLoadingCourses(false); 
+      }
     };
     fetchHomeData();
   }, []);
 
+  // Updated Badge logic for the new Lifecycle Statuses
   const getBadgeConfig = (status) => {
-    if (status === 'Ongoing') return { text: 'OPEN', bg: 'bg-success' };
-    if (status === 'Upcoming') return { text: 'COMING SOON', bg: 'bg-secondary' };
-    if (status === 'Completed') return { text: 'CLOSED', bg: 'bg-dark' };
-    return { text: 'NEW', bg: 'bg-theme-red' }; 
+    switch(status) {
+      case 'Ongoing': return { text: 'OPEN', bg: 'bg-success' };
+      case 'Extended': return { text: 'EXTENDED', bg: 'bg-warning text-dark' };
+      case 'Upcoming': return { text: 'COMING SOON', bg: 'bg-info text-white' };
+      default: return { text: 'NEW', bg: 'bg-theme-red' }; 
+    }
   };
 
   return (
@@ -143,16 +154,16 @@ const Home = () => {
         <div className="container header-content d-flex justify-content-end text-end text-white" data-aos="fade-up">
           <div style={{ maxWidth: '600px' }}>
             <h1 className="display-3 fw-bold mb-4">Empowering Young Minds</h1>
-            <p className="lead fs-4 mb-5">Learn. Create. Lead.</p>
+            <p className="lead fs-4 mb-5">Learn. Create. Lead. Join the TrioSLK Academy.</p>
             <div className="d-flex justify-content-end gap-3">
-              <Link to="/courses" className="btn btn-theme-red btn-lg rounded-pill px-5">Explore Courses</Link>
+              <Link to="/courses" className="btn btn-theme-red btn-lg rounded-pill px-5 shadow">Explore Courses</Link>
               <Link to="/about" className="btn btn-outline-light btn-lg rounded-pill px-5">About Us</Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* COURSES SECTION */}
+      {/* FEATURED COURSES SECTION */}
       <section className="py-5 bg-white">
         <div className="container py-4">
           <div className="d-flex justify-content-between align-items-end mb-4" data-aos="fade-right">
@@ -164,15 +175,15 @@ const Home = () => {
             {loadingCourses ? (
               <div className="col-12 text-center py-4"><p className="text-muted">Loading featured courses...</p></div>
             ) : featuredCourses.length === 0 ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">No courses available right now. Check back soon!</p></div>
+              <div className="col-12 text-center py-4"><p className="text-muted">No courses available right now.</p></div>
             ) : (
               featuredCourses.map((course, index) => (
                 <div key={course._id} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 150}>
                   <div className="card h-100 border-0 shadow-sm modern-card">
                     <img src={course.imageUrl} alt={course.title} className="card-img-top" style={{ height: '220px', objectFit: 'cover' }} />
-                    <div className="card-body">
-                      <h5 className="card-title fw-bold" style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{course.title}</h5>
-                      <p className="card-text text-muted" style={{ fontSize: '14px', fontWeight: '400', lineHeight: '1.5' }}>{course.shortDesc}</p>
+                    <div className="card-body p-4">
+                      <h5 className="card-title fw-bold">{course.title}</h5>
+                      <p className="card-text text-muted small">{course.shortDesc}</p>
                     </div>
                   </div>
                 </div>
@@ -181,6 +192,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      
 
       {/* VOLUNTEER CTA SECTION */}
       <section className="volunteer-section py-5 bg-white">
@@ -200,19 +213,19 @@ const Home = () => {
         </div>
       </section>
 
-      {/* UPCOMING EVENTS SECTION */}
-      <section className="py-5 bg-white">
+      {/* UPCOMING EVENTS SECTION (NOW WITH LIFECYCLE LOGIC) */}
+      <section className="py-5 bg-white border-top">
         <div className="container py-4">
           <div className="d-flex justify-content-between align-items-end mb-4" data-aos="fade-right">
-            <h2 className="fw-bold m-0">Upcoming Events & Batches</h2>
+            <h2 className="fw-bold m-0">Latest Events & Batches</h2>
             <Link to="/events" className="text-decoration-none fw-semibold text-dark">All Events <i className="bi bi-arrow-right"></i></Link>
           </div>
 
           <div className="row g-4">
             {loadingEvents ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">Loading latest events...</p></div>
+              <div className="col-12 text-center py-4"><p className="text-muted">Syncing latest events...</p></div>
             ) : recentEvents.length === 0 ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">No upcoming events at the moment. Check back soon!</p></div>
+              <div className="col-12 text-center py-4"><p className="text-muted">No active events at the moment. Check back soon!</p></div>
             ) : (
               recentEvents.map((event, index) => {
                 const badge = getBadgeConfig(event.status);
@@ -220,14 +233,18 @@ const Home = () => {
                   <div key={event._id} className="col-md-6" data-aos="fade-up" data-aos-delay={index * 200}>
                     <div className="card border-0 shadow-sm modern-card d-flex flex-row overflow-hidden h-100">
                       <div style={{ width: '150px', flexShrink: 0, position: 'relative' }}>
+                        {/* FIX: Using imageFile from model */}
                         <img src={event.imageFile} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-25"></div>
-                        <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded ${badge.bg}`} style={{ fontSize: '0.7rem' }}>{badge.text}</div>
+                        <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-10"></div>
+                        <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded shadow-sm ${badge.bg}`} style={{ fontSize: '0.65rem' }}>
+                          {badge.text}
+                        </div>
                       </div>
                       <div className="card-body d-flex flex-column justify-content-center p-4">
-                        <h5 className="card-title fw-bold" style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{event.title}</h5>
-                        <p className="card-text text-muted mb-0" style={{ fontSize: '14px', fontWeight: '400', letterSpacing: 'normal', lineHeight: '1.5' }}>
-                          {event.description.length > 60 ? event.description.substring(0, 60) + '...' : event.description}
+                        <small className="text-primary fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>{event.eventId}</small>
+                        <h5 className="card-title fw-bold mb-1">{event.title}</h5>
+                        <p className="card-text text-muted mb-0 small lh-base">
+                          {event.description.length > 80 ? event.description.substring(0, 80) + '...' : event.description}
                         </p>
                       </div>
                     </div>
@@ -238,7 +255,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
             {/* 5. FEEDBACK & INQUIRY SECTION */}
       <section className="feedback-inquiry-section py-5 bg-light">
         <div className="container py-4">

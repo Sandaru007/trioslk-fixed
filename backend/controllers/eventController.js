@@ -1,4 +1,5 @@
 const Event = require('../models/Event');
+const Registration = require('../models/Registration');
 
 // Helper function to validate event input
 const validateEventInput = (data, hasFile) => {
@@ -31,14 +32,24 @@ const validateEventInput = (data, hasFile) => {
   return errors;
 };
 
-// @desc    Get all events
-// @route   GET /api/events
+// @desc    Get All Events (Admin Use - Includes Completed)
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: -1 }); // Newest first
+    const events = await Event.find().sort({ createdAt: -1 });
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching events', error });
+    res.status(500).json({ message: 'Error fetching events' });
+  }
+};
+
+// @desc    Get Public Events (Website Use - Excludes Completed)
+const getPublicEvents = async (req, res) => {
+  try {
+    // Only show Upcoming, Ongoing, and Extended
+    const events = await Event.find({ status: { $ne: 'Completed' } }).sort({ createdAt: -1 });
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching public events' });
   }
 };
 
@@ -150,30 +161,22 @@ const updateEvent = async (req, res) => {
   }
 };
 
-// @desc    Delete an event
-// @route   DELETE /api/events/:id
+// @desc    Delete Event + Cascade Delete Registrations
 const deleteEvent = async (req, res) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
-    }
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: 'Event not found' });
 
-    res.status(200).json({
-      success: true,
-      message: 'Event deleted successfully',
-      data: event
-    });
+    // 1. Delete all registrations linked to this Event ID
+    await Registration.deleteMany({ eventCustomId: event.eventId });
+
+    // 2. Delete the event itself
+    await Event.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ success: true, message: 'Event and all registrations deleted' });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting event',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Error deleting event', error: error.message });
   }
 };
 
-module.exports = { getEvents, createEvent, updateEvent, deleteEvent };
+module.exports = { getEvents, getPublicEvents, createEvent, updateEvent, deleteEvent };

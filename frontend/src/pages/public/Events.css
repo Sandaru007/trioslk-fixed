@@ -23,6 +23,12 @@
   color: white;
 }
 
+.status-extended {
+    background-color: #fffbeb !important; /* Light yellow */
+    color: #92400e !important;           /* Darker orange/brown */
+    border: 1px solid #fde68a;
+}
+
 /* Reusing the modern card and expand icon styles */
 .modern-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
