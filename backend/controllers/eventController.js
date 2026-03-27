@@ -21,8 +21,8 @@ const validateEventInput = (data, hasFile) => {
     errors.type = 'Event type must be either Online or Physical';
   }
 
-  if (!data.status || !['Upcoming', 'Ongoing', 'Completed'].includes(data.status)) {
-    errors.status = 'Event status must be Upcoming, Ongoing, or Completed';
+  if (!data.status || !['Upcoming', 'Ongoing','Extended', 'Completed'].includes(data.status)) {
+    errors.status = 'Event status must be Upcoming, Ongoing, Extended, or Completed';
   }
 
   if (!hasFile) {
