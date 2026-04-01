@@ -1,33 +1,24 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, BookOpen, FileText, User, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, FileText, User, Bell, LogOut, Search, Mail } from 'lucide-react';
 import './Dashboard.css';
-
-// Import your sub-components
 import DashboardHome from './DashboardHome';
 import MyCourses from './MyCourses';
 import Assignments from './Assignments';
-import Profile from './Profile';
+import Profile from './Profile'
+import profileImg from '../../assets/images/profile.png';
+import logoImg from '../../assets/images/logo.jpg'; 
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-
-  const getHeaderTitle = () => {
-    switch(activeTab) {
-      case 'dashboard': return 'Student Dashboard';
-      case 'my-courses': return 'My Courses';
-      case 'assignments': return 'Assignments';
-      case 'profile': return 'My Profile';
-      default: return 'Dashboard';
-    }
-  };
 
   return (
     <div className="student-container">
 
       {/* SIDEBAR */}
-      <aside className="student-sidebar shadow-sm">
+      <aside className="student-sidebar">
         <div className="student-sidebar-logo">
-          <h2>TrioSLK <span>Student</span></h2>
+          <img src={logoImg} alt="TriosLK Logo"/>
+          <h2>TriosLK Academy</h2>
         </div>
 
         <nav className="student-nav">
@@ -61,7 +52,7 @@ const Dashboard = () => {
         </nav>
 
         {/* LOGOUT BUTTON */}
-        <div className="p-3 border-top">
+        <div className="p-3 border-top mt-auto">
           <button className="student-nav-btn text-danger">
             <LogOut size={20} /> Logout
           </button>
@@ -72,20 +63,33 @@ const Dashboard = () => {
       <main className="student-main">
 
         {/* Top Header */}
-        <header className="student-header border">
-          <h1>{getHeaderTitle()}</h1>
+        <header className="student-header">
+          <div className="search-container">
+            <Search size={18} className="search-icon" />
+            <input type="text" placeholder="Search..." className="search-input" />
+          </div>
 
           <div className="header-actions">
-            <Bell size={22} className="text-muted" style={{ cursor: 'pointer' }} />
-            <div className="d-flex align-items-center gap-2">
-              <div className="student-mini-profile">KS</div>
-              <span className="fw-medium text-dark d-none d-md-block">Kavishka S.</span>
-            </div>
+            <button className="icon-btn">
+              <Mail size={20} />
+            </button>
+            <button className="icon-btn">
+              <Bell size={20} />
+              <span className="notification-badge"></span>
+            </button>
+            
+            <button className="user-profile-btn">
+              <img src={profileImg} alt="Diane Nguyen" className="user-avatar" />
+              <div className="user-info d-none d-md-block">
+                <span className="user-name">Kavishka Shenal</span>
+                <span className="user-role">Student</span>
+              </div>
+            </button>
           </div>
         </header>
 
         {/* Tab Content Rendering */}
-        <div className="animate__animated animate__fadeIn">
+        <div className="animate__animated animate__fadeIn flex-grow-1">
           {activeTab === 'dashboard' && <DashboardHome />}
           {activeTab === 'my-courses' && <MyCourses />}
           {activeTab === 'assignments' && <Assignments />}
