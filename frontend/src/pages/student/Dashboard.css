@@ -1,19 +1,21 @@
 /* ================= Base Styles ================= */
 :root {
-  --lms-blue: #f10078; /* Updated: Main Blue from reference image */
+  --lms-blue: #99264c; /* Updated: Main Blue from reference image */
   --lms-pink: #f10078;
   --lms-bg: #e0f2fe; /* Updated: Soft light blue background */
   --sidebar-active-bg: #e0f2fe; /* Updated: Light blue for active sidebar links */
   --text-main: #1f2937;
   --text-muted: #6b7280;
+  --welcome-color: #ffffff;
 }
 
 .student-container {
   display: flex;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
-  background-color: var(--lms-bg);
   padding: 20px; /* Floating effect for the main containers */
+  background: var(--lms-bg) url('../../assets/images/abstract-69-background-wallpaper-gradient_792836-161159.avif') no-repeat center center fixed;
+  background-size: cover;
 }
 
 /* ================= Sidebar ================= */
@@ -33,19 +35,17 @@
 .student-sidebar-logo {
   /* Updated padding to manage logo positioning */
   padding: 30px 20px;
-  display: flex;
+  display:flex;
   flex-direction: column; /* Updated: Stack logo on top of text */
-  align-items: center; /* Center align items */
-  gap: 10px;
+  align-items:flex-start; /* Center align items */
+  gap: 1px;
 }
 
 .student-sidebar-logo img {
   /* This is the larger size you requested */
-  height: 250px; 
-  
-  /* ensure aspect ratio is kept */
-  width: auto;
-  object-fit: contain;
+  height: 250px;
+  width: 200px;
+  object-fit:cover;
 }
 
 .student-sidebar-logo h2 {
@@ -58,7 +58,7 @@
 
 /* Rest of your CSS (updated to Blue and Rounded aesthetic) */
 .student-nav {
-  padding: 10px 15px;
+  padding: 1px 5px;
   flex-grow: 1;
 }
 
@@ -237,14 +237,9 @@
 
 /* ================= Welcome Banner ================= */
 .lms-card.welcome-banner {
-  /* ========================================== */
-  /* STEP 1: FORCE THE COLOR CHANGE */
-  /* ========================================== */
-  /* Using !important forces the browser to use this specific color, 
-     overriding other CSS rules or inline styles. */
-  background-color: #f10078 !important; 
-  
-  color: #fff;
+  background: var(--lms-bg) url('../../assets/images/welcome3.avif') no-repeat center center fixed;
+  background-size: cover;
+  color: #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -266,7 +261,7 @@
 
 /* Ensure headings inside the banner stay white */
 .lms-card.welcome-banner h2 {
-  color: #fff !important;
+  color: #ffffff !important;
   font-size: 2rem;
   margin: 0 0 10px 0;
 }
