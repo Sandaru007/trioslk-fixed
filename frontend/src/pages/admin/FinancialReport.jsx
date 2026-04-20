@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Download, DollarSign, CreditCard, CheckCircle, PieChart } from 'lucide-react';
+import { Download, DollarSign, CreditCard, CheckCircle, PieChart, Trash2 } from 'lucide-react';
 import './AdminDashboard.css';
 
 const FinancialReport = () => {
@@ -56,13 +56,26 @@ const FinancialReport = () => {
         }
     };
 
+    const handleDeletePayment = async (paymentId) => {
+        if (!window.confirm("Are you sure you want to completely delete this payment record? This cannot be undone.")) {
+            return;
+        }
+        try {
+            await api.delete(`/payments/${paymentId}`);
+            setPayments(prev => prev.filter(p => p._id !== paymentId));
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+            alert('Failed to delete payment completely');
+        }
+    };
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
     const exportToCSV = () => {
-        const headers = ['Generated ID', 'Student ID', 'Student Name', 'Course', 'Amount', 'Method', 'Date', 'Status'];
+        const headers = ['Payment ID', 'Student ID', 'Student Name', 'Course', 'Amount', 'Method', 'Date', 'Status'];
         const rows = payments.map(payment => [
             payment.generatedID || payment._id,
             payment.studentId || 'N/A',
@@ -199,7 +212,7 @@ const FinancialReport = () => {
                         <table className="financial-table">
                             <thead>
                                 <tr>
-                                    <th>Generated ID</th>
+                                    <th>Payment ID</th>
                                     <th>Student ID</th>
                                     <th>Student Name</th>
                                     <th>Course</th>
@@ -208,6 +221,7 @@ const FinancialReport = () => {
                                     <th>Receipt</th>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -221,8 +235,8 @@ const FinancialReport = () => {
                                         <td>{payment.method}</td>
                                         <td>
                                             {payment.receiptUrl ? (
-                                                <a href={payment.receiptUrl.includes(".pdf") ? payment.receiptUrl.replace(/\.pdf$/i, ".jpg") : payment.receiptUrl} 
-                                                   target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
+                                                <a href={payment.receiptUrl.includes(".pdf") ? payment.receiptUrl.replace(/\.pdf$/i, ".jpg") : payment.receiptUrl}
+                                                    target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
                                                     View Receipt
                                                 </a>
                                             ) : (
@@ -231,8 +245,8 @@ const FinancialReport = () => {
                                         </td>
                                         <td>{new Date(payment.date).toLocaleDateString()}</td>
                                         <td>
-                                            <select 
-                                                className={`form-select form-select-sm border-0 fw-bold status-badge ${payment.status.toLowerCase()}`} 
+                                            <select
+                                                className={`form-select form-select-sm border-0 fw-bold status-badge ${payment.status.toLowerCase()}`}
                                                 value={payment.status}
                                                 onChange={(e) => handleStatusChange(payment._id, e.target.value)}
                                                 style={{ cursor: 'pointer', outline: 'none', boxShadow: 'none' }}
@@ -241,6 +255,15 @@ const FinancialReport = () => {
                                                 <option value="Completed" className="text-dark">Completed</option>
                                                 <option value="Failed" className="text-dark">Failed</option>
                                             </select>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="btn btn-sm btn-outline-danger border-0"
+                                                onClick={() => handleDeletePayment(payment._id)}
+                                                title="Delete Record"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

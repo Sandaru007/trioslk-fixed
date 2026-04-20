@@ -163,26 +163,61 @@ const Courses = () => {
               ) : (
                 <form onSubmit={handlePayment}>
                   <div className="mb-4">
-                    <label className="form-label fw-medium text-muted small">Select Payment Method</label>
-                    <select name="paymentMethod" className="form-select" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} required>
-                      <option value="">Choose a method...</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                    </select>
+                    <label className="form-label fw-medium text-muted small mb-3">Select Payment Method</label>
+                    <div className="payment-method-selector">
+                      <label className={`payment-method-card ${paymentMethod === 'Bank Transfer' ? 'active' : ''}`}>
+                        <input 
+                          type="radio" 
+                          name="paymentMethod" 
+                          value="Bank Transfer" 
+                          checked={paymentMethod === 'Bank Transfer'}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="d-none"
+                          required
+                        />
+                        <div className="d-flex align-items-center">
+                          <div className="method-icon"><i className="bi bi-bank"></i></div>
+                          <div className="method-info">
+                            <h6 className="mb-0 fw-bold">Bank Transfer</h6>
+                            <small className="text-muted">Direct transfer to our bank account</small>
+                          </div>
+                          <div className="ms-auto check-icon">
+                            <i className="bi bi-check-circle-fill"></i>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
                   </div>
 
                   {paymentMethod === 'Bank Transfer' && (
-                    <div className="card shadow-sm border-0 mb-4 bg-light">
-                      <div className="card-body">
-                        <h6 className="fw-bold mb-3"><i className="bi bi-bank me-2"></i>Bank Transfer Details</h6>
-                        <p className="small mb-1 text-muted">Please transfer the amount to the following account:</p>
-                        <div className="p-2 border rounded bg-white mb-3 small">
-                          <strong>Bank:</strong> Commercial Bank<br/>
-                          <strong>Account Name:</strong> TrioSLK Academy<br/>
-                          <strong>Account No:</strong> 1234-5678-9012
+                    <div className="bank-transfer-details animate-fade-in mb-4">
+                      <div className="d-flex align-items-center mb-3">
+                        <div className="bank-logo-placeholder me-3">
+                          <i className="bi bi-building fs-3" style={{ color: 'var(--trioslk-maroon, #7a1b29)' }}></i>
                         </div>
-                        <div className="mb-2">
-                          <label className="form-label small text-muted">Upload Receipt (PDF)</label>
-                          <input type="file" name="receipt" accept=".pdf" className="form-control" required />
+                        <div>
+                          <h6 className="fw-bold mb-1">Commercial Bank</h6>
+                          <span className="badge bg-light text-dark border">TrioSLK Academy</span>
+                        </div>
+                      </div>
+                      
+                      <div className="account-number-box mb-4">
+                        <span className="small text-muted d-block mb-1">Account Number</span>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="fs-5 fw-bold font-monospace tracking-wider text-dark">1234 5678 9012</span>
+                        </div>
+                      </div>
+
+                      <div className="upload-receipt-area">
+                        <label className="form-label fw-medium text-dark small mb-2 d-flex align-items-center">
+                          <i className="bi bi-cloud-arrow-up me-2" style={{ color: 'var(--trioslk-maroon, #7a1b29)' }}></i>
+                          Upload Payment Receipt (PDF)
+                        </label>
+                        <div className="file-upload-wrapper">
+                          <input type="file" name="receipt" accept=".pdf" className="form-control file-input-custom" required />
+                          <div className="form-text text-muted small mt-2">
+                             Max file size: 5MB. Only PDF accepted.
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -194,7 +229,7 @@ const Courses = () => {
                   
                   <div className="d-flex gap-2">
                     <button type="button" className="btn btn-light flex-grow-1" onClick={() => { setStep(1); setPaymentMethod(''); }}>Back</button>
-                    <button type="submit" className="btn btn-success flex-grow-1 py-2 fw-bold" disabled={!paymentMethod}>Pay Now</button>
+                    <button type="submit" className="btn btn-theme-red flex-grow-1 py-2 fw-bold" disabled={!paymentMethod}>Pay Now <i className="bi bi-shield-lock ms-2"></i></button>
                   </div>
                 </form>
               )}
