@@ -221,8 +221,9 @@ const FinancialReport = () => {
                                         <td>{payment.method}</td>
                                         <td>
                                             {payment.receiptUrl ? (
-                                                <a href={payment.receiptUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
-                                                    View Form
+                                                <a href={payment.receiptUrl.includes(".pdf") ? payment.receiptUrl.replace(/\.pdf$/i, ".jpg") : payment.receiptUrl} 
+                                                   target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
+                                                    View Receipt
                                                 </a>
                                             ) : (
                                                 <span className="text-muted" style={{ fontSize: '12px' }}>N/A</span>
