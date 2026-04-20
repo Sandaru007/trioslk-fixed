@@ -7,6 +7,9 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [step, setStep] = useState(1);
+  const [enrollmentData, setEnrollmentData] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('');
 
   useEffect(() => {
     const fetchLiveCourses = async () => {
@@ -18,6 +21,46 @@ const Courses = () => {
     };
     fetchLiveCourses();
   }, []);
+
+  const proceedToPayment = (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    setEnrollmentData({
+      fullName: data.get('fullName'),
+      email: data.get('email'),
+      phone: data.get('phone'),
+      studentId: data.get('studentId') || 'New Student',
+    });
+    setStep(2);
+  };
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const method = data.get('paymentMethod');
+    try {
+      await api.post('/payments', {
+        studentId: enrollmentData.studentId,
+        studentName: enrollmentData.fullName,
+        courseId: selectedCourse._id,
+        courseTitle: selectedCourse.title,
+        amount: 15000, // Fixed course fee
+        method: method,
+        status: 'Pending'
+      });
+      alert('Enrollment and payment submitted successfully!');
+      
+      const modalElement = document.getElementById('enrollmentModal');
+      const closeBtn = modalElement.querySelector('.btn-close');
+      if (closeBtn) closeBtn.click();
+      
+      setStep(1);
+      setEnrollmentData(null);
+    } catch (error) {
+      console.error(error);
+      alert('Payment failed');
+    }
+  };
 
   return (
     <div>
@@ -66,7 +109,7 @@ const Courses = () => {
                       <button className="btn btn-light flex-grow-1 fw-medium collapse-btn text-dark border shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target={`#collapseCourse${course._id}`} aria-expanded="false">
                         Details <i className="bi bi-chevron-down ms-1 expand-icon"></i>
                       </button>
-                      <button className={`btn flex-grow-1 fw-medium shadow-sm ${course.status === 'Closed' ? 'btn-secondary' : 'btn-theme-red'}`} data-bs-toggle="modal" data-bs-target="#enrollmentModal" onClick={() => setSelectedCourse(course.title)} disabled={course.status === 'Closed'}>
+                      <button className={`btn flex-grow-1 fw-medium shadow-sm ${course.status === 'Closed' ? 'btn-secondary' : 'btn-theme-red'}`} data-bs-toggle="modal" data-bs-target="#enrollmentModal" onClick={() => { setSelectedCourse(course); setStep(1); }} disabled={course.status === 'Closed'}>
                         {course.status === 'Closed' ? 'Closed' : 'Enroll Now'}
                       </button>
                     </div>
@@ -83,22 +126,91 @@ const Courses = () => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content border-0 shadow-lg">
             <div className="modal-header bg-light border-bottom-0 pb-0">
-              <h5 className="modal-title fw-bold" id="enrollmentModalLabel">Course Enrollment</h5>
+              <h5 className="modal-title fw-bold" id="enrollmentModalLabel">
+                {step === 1 ? 'Course Enrollment' : 'Payment Details'}
+              </h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body p-4">
               <div className="alert alert-secondary mb-4 border-0 text-dark">
-                You are applying for: <strong>{selectedCourse || "a course"}</strong>
+                {step === 1 ? (
+                  <>You are applying for: <strong>{selectedCourse?.title || "a course"}</strong></>
+                ) : (
+                  <>Course Fee: <strong>Rs. 15,000</strong></>
+                )}
               </div>
-              <form>
-                <div className="mb-3"><label className="form-label fw-medium text-muted small">Full Name</label><input type="text" className="form-control" placeholder="Enter your full name" required /></div>
-                <div className="row mb-3">
-                  <div className="col-md-6"><label className="form-label fw-medium text-muted small">Email Address</label><input type="email" className="form-control" placeholder="name@example.com" required /></div>
-                  <div className="col-md-6 mt-3 mt-md-0"><label className="form-label fw-medium text-muted small">Phone Number</label><input type="tel" className="form-control" placeholder="07XXXXXXXX" required /></div>
-                </div>
-                <div className="mb-4"><label className="form-label fw-medium text-muted small">Student ID (If applicable)</label><input type="text" className="form-control" placeholder="e.g. STU001" /><div className="form-text">Leave blank if you are a new student.</div></div>
-                <button type="submit" className="btn btn-theme-red w-100 py-2 fw-bold">Enroll Me</button>
-              </form>
+              
+              {step === 1 ? (
+                <form onSubmit={proceedToPayment}>
+                  <div className="mb-3"><label className="form-label fw-medium text-muted small">Full Name</label><input type="text" name="fullName" className="form-control" placeholder="Enter your full name" required /></div>
+                  <div className="row mb-3">
+                    <div className="col-md-6"><label className="form-label fw-medium text-muted small">Email Address</label><input type="email" name="email" className="form-control" placeholder="name@example.com" required /></div>
+                    <div className="col-md-6 mt-3 mt-md-0"><label className="form-label fw-medium text-muted small">Phone Number</label><input type="tel" name="phone" className="form-control" placeholder="07XXXXXXXX" required /></div>
+                  </div>
+                  <div className="mb-4"><label className="form-label fw-medium text-muted small">Student ID (If applicable)</label><input type="text" name="studentId" className="form-control" placeholder="e.g. STU001" /><div className="form-text">Leave blank if you are a new student.</div></div>
+                  <button type="submit" className="btn btn-theme-red w-100 py-2 fw-bold">Proceed to Payment <i className="bi bi-arrow-right ms-2"></i></button>
+                </form>
+              ) : (
+                <form onSubmit={handlePayment}>
+                  <div className="mb-4">
+                    <label className="form-label fw-medium text-muted small">Select Payment Method</label>
+                    <select name="paymentMethod" className="form-select" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} required>
+                      <option value="">Choose a method...</option>
+                      <option value="Card">Credit / Debit Card</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                  </div>
+
+                  {paymentMethod === 'Card' && (
+                    <div className="card shadow-sm border-0 mb-4 bg-light">
+                      <div className="card-body">
+                        <h6 className="fw-bold mb-3"><i className="bi bi-credit-card me-2"></i>Card Details</h6>
+                        <div className="mb-3">
+                          <label className="form-label small text-muted">Card Number</label>
+                          <input type="text" className="form-control" placeholder="XXXX XXXX XXXX XXXX" required />
+                        </div>
+                        <div className="row">
+                          <div className="col-6">
+                            <label className="form-label small text-muted">Expiry (MM/YY)</label>
+                            <input type="text" className="form-control" placeholder="MM/YY" required />
+                          </div>
+                          <div className="col-6">
+                            <label className="form-label small text-muted">CVV</label>
+                            <input type="text" className="form-control" placeholder="123" required />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'Bank Transfer' && (
+                    <div className="card shadow-sm border-0 mb-4 bg-light">
+                      <div className="card-body">
+                        <h6 className="fw-bold mb-3"><i className="bi bi-bank me-2"></i>Bank Transfer Details</h6>
+                        <p className="small mb-1 text-muted">Please transfer the amount to the following account:</p>
+                        <div className="p-2 border rounded bg-white mb-3 small">
+                          <strong>Bank:</strong> Commercial Bank<br/>
+                          <strong>Account Name:</strong> TrioSLK Academy<br/>
+                          <strong>Account No:</strong> 1234-5678-9012
+                        </div>
+                        <div className="mb-2">
+                          <label className="form-label small text-muted">Reference No. (or Receipt)</label>
+                          <input type="text" className="form-control" placeholder="Enter Ref number or upload receipt" required />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="p-3 bg-light rounded mb-4">
+                    <p className="text-muted small mb-0">By clicking "Pay Now", you confirm your enrollment and agree to the course terms and conditions.</p>
+                  </div>
+                  
+                  <div className="d-flex gap-2">
+                    <button type="button" className="btn btn-light flex-grow-1" onClick={() => { setStep(1); setPaymentMethod(''); }}>Back</button>
+                    <button type="submit" className="btn btn-success flex-grow-1 py-2 fw-bold" disabled={!paymentMethod}>Pay Now</button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

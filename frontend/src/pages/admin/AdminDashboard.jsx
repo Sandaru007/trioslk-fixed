@@ -11,6 +11,7 @@ import EmployeeManagement from './EmployeeManagement';
 import UserManagement from './UserManagement';
 import AdminOverview from './AdminOverview';
 import EventManagement from './EventManagement';
+import FinancialReport from './FinancialReport';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -108,8 +109,9 @@ const AdminDashboard = () => {
           {activeTab === 'users' && <UserManagement />}
           {activeTab === 'employees' && <EmployeeManagement />}
           {activeTab === 'events' && <EventManagement />}
+          {activeTab === 'finance' && <FinancialReport />}
 
-          {['sessions', 'finance', 'feedback'].includes(activeTab) && (
+          {['sessions', 'feedback'].includes(activeTab) && (
             <div className="view-placeholder">
               <h3>Section Under Construction</h3>
               <p>This module is currently being developed by the team.</p>

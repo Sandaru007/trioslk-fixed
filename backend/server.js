@@ -23,7 +23,7 @@ const materialRoutes = require('./routes/materialRoutes');
 const sessionRoutes = require('./routes/sessionRoutes'); 
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
-
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
@@ -44,6 +44,7 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/', (req, res) => {
   res.send('TrioSLK API is running...');

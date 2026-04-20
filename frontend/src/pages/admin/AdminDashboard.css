@@ -241,3 +241,240 @@
     gap: 25px;
 }
 
+/* ========================================= */
+/* FINANCIAL REPORT STYLES */
+/* ========================================= */
+
+.admin-dashboard-container {
+    padding: 10px;
+}
+
+.dashboard-header {
+    margin-bottom: 25px;
+}
+
+.dashboard-header h2 {
+    color: #1b2559;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.dashboard-header p {
+    color: #a3aed0;
+    margin: 0;
+}
+
+.filter-card {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.filter-grid {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.filter-group label {
+    font-size: 13px;
+    color: #a3aed0;
+    font-weight: 600;
+}
+
+.filter-group select {
+    background: #f4f7fe;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    color: #1b2559;
+    font-weight: 500;
+    outline: none;
+}
+
+.export-btn {
+    background: #05cd99;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.export-btn:hover {
+    background: #04b386;
+}
+
+/* Financial Stat Cards Details */
+.stat-card.income .stat-icon { background: #e2f9ef; color: #05cd99; }
+.stat-card.total-payments .stat-icon { background: #e9edfe; color: #4318ff; }
+.stat-card.pending .stat-icon { background: #fff5e6; color: #ff9900; }
+.stat-card.completed .stat-icon { background: #e2f9ef; color: #05cd99; }
+
+.stat-content h3 {
+    font-size: 14px;
+    color: #a3aed0;
+    margin: 0 0 5px 0;
+}
+
+.stat-content p:not(.stat-description) {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1b2559;
+    margin: 0;
+}
+
+.stat-description {
+    font-size: 12px;
+    color: #a3aed0;
+    margin: 5px 0 0 0;
+}
+
+/* Charts & Table Layout */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.chart-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #f4f7fe;
+    padding-bottom: 15px;
+}
+
+.chart-header h4 {
+    color: #1b2559;
+    margin: 0;
+    font-weight: 700;
+}
+
+.chart-header svg {
+    color: #4318ff;
+}
+
+.pie-chart {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.pie-slice {
+    background: #f4f7fe;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 100px;
+}
+
+.method-label {
+    font-size: 13px;
+    color: #a3aed0;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.method-count {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1b2559;
+}
+
+.no-data, .no-data-message {
+    color: #a3aed0;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Financial Table */
+.table-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+}
+
+.table-card h3 {
+    margin: 0 0 20px 0;
+    color: #1b2559;
+    font-weight: 700;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.financial-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.financial-table th {
+    background: #f4f7fe;
+    padding: 15px;
+    text-align: left;
+    color: #a3aed0;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.financial-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f4f7fe;
+    color: #2b3674;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.status-badge.completed { background: #e2f9ef; color: #05cd99; }
+.status-badge.pending { background: #fff5e6; color: #ff9900; }
+.status-badge.failed { background: #feebeb; color: #ee5d50; }
+
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+    color: #4318ff;
+    font-weight: 600;
+}
