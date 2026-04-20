@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
+  generatedID: { type: String, unique: true },
   studentId: {
     type: String,
     default: 'New Student'
@@ -15,6 +16,7 @@ const paymentSchema = new mongoose.Schema({
   amount: Number,
   method: String,
   status: { type: String, default: 'Pending' },
+  receiptUrl: { type: String },
   date: { type: Date, default: Date.now }
 });
 

@@ -26,7 +26,49 @@ exports.getPaymentById = async (req, res) => {
 // Create payment
 exports.createPayment = async (req, res) => {
   try {
-    const payment = new Payment(req.body);
+    const paymentData = { ...req.body };
+    if (req.file) {
+      paymentData.receiptUrl = req.file.path; // Set by Cloudinary
+    }
+
+    // Auto-generate STU-XXXX if not provided or is New Student
+    if (!paymentData.studentId || paymentData.studentId === 'New Student') {
+      const Student = require('../models/Student');
+      
+      const lastStudent = await Student.findOne({ studentId: /^STU-/ }).sort({ createdAt: -1 });
+      const lastPayment = await Payment.findOne({ studentId: /^STU-/ }).sort({ date: -1 });
+
+      let maxIdNum = 1000; // Start at 1000
+
+      if (lastStudent && lastStudent.studentId) {
+        const parts = lastStudent.studentId.split('-');
+        if (parts.length === 2 && !isNaN(parts[1])) {
+          maxIdNum = Math.max(maxIdNum, parseInt(parts[1], 10));
+        }
+      }
+
+      if (lastPayment && lastPayment.studentId) {
+        const parts = lastPayment.studentId.split('-');
+        if (parts.length === 2 && !isNaN(parts[1])) {
+          maxIdNum = Math.max(maxIdNum, parseInt(parts[1], 10));
+        }
+      }
+
+      paymentData.studentId = `STU-${maxIdNum + 1}`;
+    }
+
+    // Auto-generate generatedID for the payment record itself (PAY-XXXX)
+    const lastRec = await Payment.findOne({ generatedID: /^PAY-/ }).sort({ date: -1 });
+    let payIdNum = 1000;
+    if (lastRec && lastRec.generatedID) {
+      const p = lastRec.generatedID.split('-');
+      if (p.length === 2 && !isNaN(p[1])) {
+        payIdNum = parseInt(p[1], 10);
+      }
+    }
+    paymentData.generatedID = `PAY-${payIdNum + 1}`;
+
+    const payment = new Payment(paymentData);
     await payment.save();
     res.status(201).json(payment);
   } catch (error) {

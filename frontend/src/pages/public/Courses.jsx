@@ -39,14 +39,24 @@ const Courses = () => {
     const data = new FormData(e.target);
     const method = data.get('paymentMethod');
     try {
-      await api.post('/payments', {
-        studentId: enrollmentData.studentId,
-        studentName: enrollmentData.fullName,
-        courseId: selectedCourse._id,
-        courseTitle: selectedCourse.title,
-        amount: 15000, // Fixed course fee
-        method: method,
-        status: 'Pending'
+      const formData = new FormData();
+      formData.append('studentId', enrollmentData.studentId);
+      formData.append('studentName', enrollmentData.fullName);
+      formData.append('courseId', selectedCourse._id);
+      formData.append('courseTitle', selectedCourse.title);
+      formData.append('amount', 15000);
+      formData.append('method', method);
+      formData.append('status', 'Pending');
+      
+      if (method === 'Bank Transfer') {
+        const receiptFile = data.get('receipt');
+        if (receiptFile) {
+          formData.append('receipt', receiptFile);
+        }
+      }
+
+      await api.post('/payments', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Enrollment and payment submitted successfully!');
       
@@ -156,32 +166,9 @@ const Courses = () => {
                     <label className="form-label fw-medium text-muted small">Select Payment Method</label>
                     <select name="paymentMethod" className="form-select" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} required>
                       <option value="">Choose a method...</option>
-                      <option value="Card">Credit / Debit Card</option>
                       <option value="Bank Transfer">Bank Transfer</option>
                     </select>
                   </div>
-
-                  {paymentMethod === 'Card' && (
-                    <div className="card shadow-sm border-0 mb-4 bg-light">
-                      <div className="card-body">
-                        <h6 className="fw-bold mb-3"><i className="bi bi-credit-card me-2"></i>Card Details</h6>
-                        <div className="mb-3">
-                          <label className="form-label small text-muted">Card Number</label>
-                          <input type="text" className="form-control" placeholder="XXXX XXXX XXXX XXXX" required />
-                        </div>
-                        <div className="row">
-                          <div className="col-6">
-                            <label className="form-label small text-muted">Expiry (MM/YY)</label>
-                            <input type="text" className="form-control" placeholder="MM/YY" required />
-                          </div>
-                          <div className="col-6">
-                            <label className="form-label small text-muted">CVV</label>
-                            <input type="text" className="form-control" placeholder="123" required />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {paymentMethod === 'Bank Transfer' && (
                     <div className="card shadow-sm border-0 mb-4 bg-light">
@@ -194,8 +181,8 @@ const Courses = () => {
                           <strong>Account No:</strong> 1234-5678-9012
                         </div>
                         <div className="mb-2">
-                          <label className="form-label small text-muted">Reference No. (or Receipt)</label>
-                          <input type="text" className="form-control" placeholder="Enter Ref number or upload receipt" required />
+                          <label className="form-label small text-muted">Upload Receipt (PDF)</label>
+                          <input type="file" name="receipt" accept=".pdf" className="form-control" required />
                         </div>
                       </div>
                     </div>

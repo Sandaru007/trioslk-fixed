@@ -46,15 +46,26 @@ const FinancialReport = () => {
         }
     };
 
+    const handleStatusChange = async (paymentId, newStatus) => {
+        try {
+            await api.put(`/payments/${paymentId}`, { status: newStatus });
+            setPayments(prev => prev.map(p => p._id === paymentId ? { ...p, status: newStatus } : p));
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Failed to update payment status');
+        }
+    };
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
     const exportToCSV = () => {
-        const headers = ['ID', 'Student', 'Course', 'Amount', 'Method', 'Date', 'Status'];
+        const headers = ['Generated ID', 'Student ID', 'Student Name', 'Course', 'Amount', 'Method', 'Date', 'Status'];
         const rows = payments.map(payment => [
-            payment._id,
+            payment.generatedID || payment._id,
+            payment.studentId || 'N/A',
             payment.studentName,
             payment.courseTitle,
             payment.amount,
@@ -115,7 +126,6 @@ const FinancialReport = () => {
                         <label>Method</label>
                         <select name="paymentMethod" value={filters.paymentMethod} onChange={handleFilterChange}>
                             <option value="">All Methods</option>
-                            <option value="Card">Card</option>
                             <option value="Bank Transfer">Bank Transfer</option>
                         </select>
                     </div>
@@ -189,10 +199,13 @@ const FinancialReport = () => {
                         <table className="financial-table">
                             <thead>
                                 <tr>
-                                    <th>Student</th>
+                                    <th>Generated ID</th>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
                                     <th>Course</th>
                                     <th>Amount</th>
                                     <th>Method</th>
+                                    <th>Receipt</th>
                                     <th>Date</th>
                                     <th>Status</th>
                                 </tr>
@@ -200,12 +213,34 @@ const FinancialReport = () => {
                             <tbody>
                                 {payments.map(payment => (
                                     <tr key={payment._id}>
+                                        <td><span className="text-primary fw-bold">{payment.generatedID || 'N/A'}</span></td>
+                                        <td><span className="text-secondary fw-medium">{payment.studentId && payment.studentId !== 'New Student' ? payment.studentId : 'N/A'}</span></td>
                                         <td>{payment.studentName}</td>
                                         <td>{payment.courseTitle}</td>
                                         <td>Rs. {payment.amount.toLocaleString()}</td>
                                         <td>{payment.method}</td>
+                                        <td>
+                                            {payment.receiptUrl ? (
+                                                <a href={payment.receiptUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
+                                                    View Form
+                                                </a>
+                                            ) : (
+                                                <span className="text-muted" style={{ fontSize: '12px' }}>N/A</span>
+                                            )}
+                                        </td>
                                         <td>{new Date(payment.date).toLocaleDateString()}</td>
-                                        <td><span className={`status-badge ${payment.status.toLowerCase()}`}>{payment.status}</span></td>
+                                        <td>
+                                            <select 
+                                                className={`form-select form-select-sm border-0 fw-bold status-badge ${payment.status.toLowerCase()}`} 
+                                                value={payment.status}
+                                                onChange={(e) => handleStatusChange(payment._id, e.target.value)}
+                                                style={{ cursor: 'pointer', outline: 'none', boxShadow: 'none' }}
+                                            >
+                                                <option value="Pending" className="text-dark">Pending</option>
+                                                <option value="Completed" className="text-dark">Completed</option>
+                                                <option value="Failed" className="text-dark">Failed</option>
+                                            </select>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
