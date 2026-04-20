@@ -229,7 +229,7 @@ const Courses = () => {
                   
                   <div className="d-flex gap-2">
                     <button type="button" className="btn btn-light flex-grow-1" onClick={() => { setStep(1); setPaymentMethod(''); }}>Back</button>
-                    <button type="submit" className="btn btn-theme-red flex-grow-1 py-2 fw-bold" disabled={!paymentMethod}>Pay Now <i className="bi bi-shield-lock ms-2"></i></button>
+                    <button type="submit" className="btn btn-danger flex-grow-1 py-2 fw-bold" disabled={!paymentMethod}>Pay Now <i className="bi bi-shield-lock ms-2"></i></button>
                   </div>
                 </form>
               )}
