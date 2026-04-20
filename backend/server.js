@@ -32,7 +32,7 @@ app.use(cors());
 app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
 
-// --- API Endpoints ---
+// --- API Endpoints (shows the server where to send specific requests.) ---
 app.use('/api/employees', employeeRoutes);
 app.use('/api/students', studentRoutes); 
 app.use('/api/volunteers', volunteerRoutes);
