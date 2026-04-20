@@ -28,7 +28,7 @@ exports.createFeedback = async (req, res) => {
   }
 };
 
-// GET all feedback (for admin later)
+// GET all feedback (for admin)
 exports.getAllFeedback = async (req, res) => {
   try {
     const feedbacks = await Feedback.find().sort({ createdAt: -1 });
@@ -42,6 +42,79 @@ exports.getAllFeedback = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching feedback',
+      error: error.message,
+    });
+  }
+};
+
+// SHOW feedback on homepage
+exports.showFeedbackOnHomepage = async (req, res) => {
+  try {
+    const feedback = await Feedback.findByIdAndUpdate(
+      req.params.id,
+      { showOnHomepage: true },
+      { new: true }
+    );
+
+    if (!feedback) {
+      return res.status(404).json({
+        success: false,
+        message: 'Feedback not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Feedback is now visible on homepage',
+      data: feedback,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating feedback',
+      error: error.message,
+    });
+  }
+};
+
+// DELETE feedback
+exports.deleteFeedback = async (req, res) => {
+  try {
+    const feedback = await Feedback.findByIdAndDelete(req.params.id);
+
+    if (!feedback) {
+      return res.status(404).json({
+        success: false,
+        message: 'Feedback not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Feedback deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting feedback',
+      error: error.message,
+    });
+  }
+};
+
+// GET only homepage-visible feedback
+exports.getHomepageFeedback = async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find({ showOnHomepage: true }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: feedbacks,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching homepage feedback',
       error: error.message,
     });
   }

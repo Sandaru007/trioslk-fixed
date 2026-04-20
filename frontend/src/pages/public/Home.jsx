@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< Updated upstream
 import api from '../../services/api'; // <-- 1. IMPORT YOUR NEW API UTILITY
+=======
+import api from '../../services/api';
+>>>>>>> Stashed changes
 import { Link } from 'react-router-dom';
 import homeImg from '../../assets/images/hero-img.jpg';
 import volunteerImpactImg from '../../assets/images/volunteer.jpg';
 import './Home.css';
 
 const Home = () => {
+  const [homepageFeedbacks, setHomepageFeedbacks] = useState([]);
+  const [loadingHomepageFeedbacks, setLoadingHomepageFeedbacks] = useState(true);
 
-    const [feedbackData, setFeedbackData] = useState({
+  const [feedbackData, setFeedbackData] = useState({
     name: '',
     email: '',
     course: '',
@@ -22,6 +28,11 @@ const Home = () => {
     category: '',
     message: '',
   });
+
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingCourses, setLoadingCourses] = useState(true);
 
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
@@ -106,14 +117,11 @@ const Home = () => {
       alert(error.message);
     }
   };
-  const [recentEvents, setRecentEvents] = useState([]);
-  const [featuredCourses, setFeaturedCourses] = useState([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadingCourses, setLoadingCourses] = useState(true);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
+<<<<<<< Updated upstream
         const eventRes = await api.get('/events'); // <-- 2. CLEANER URL
         setRecentEvents(eventRes.data.slice(0, 2)); 
       } catch (error) { console.error('Error fetching recent events:', error); } 
@@ -124,15 +132,56 @@ const Home = () => {
         setFeaturedCourses(courseRes.data.slice(0, 3)); 
       } catch (error) { console.error('Error fetching featured courses:', error); } 
       finally { setLoadingCourses(false); }
+=======
+        const eventRes = await api.get('/events/public');
+        setRecentEvents(eventRes.data.slice(0, 2));
+      } catch (error) {
+        console.error('Error fetching recent events:', error);
+      } finally {
+        setLoadingEvents(false);
+      }
+
+      try {
+        const courseRes = await api.get('/courses');
+        setFeaturedCourses(courseRes.data.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching featured courses:', error);
+      } finally {
+        setLoadingCourses(false);
+      }
+
+      try {
+        const feedbackRes = await api.get('/feedback/homepage');
+        setHomepageFeedbacks(feedbackRes.data.data || []);
+      } catch (error) {
+        console.error('Error fetching homepage feedback:', error);
+      } finally {
+        setLoadingHomepageFeedbacks(false);
+      }
+>>>>>>> Stashed changes
     };
+
     fetchHomeData();
   }, []);
 
   const getBadgeConfig = (status) => {
+<<<<<<< Updated upstream
     if (status === 'Ongoing') return { text: 'OPEN', bg: 'bg-success' };
     if (status === 'Upcoming') return { text: 'COMING SOON', bg: 'bg-secondary' };
     if (status === 'Completed') return { text: 'CLOSED', bg: 'bg-dark' };
     return { text: 'NEW', bg: 'bg-theme-red' }; 
+=======
+    switch (status) {
+      case 'Ongoing':
+        return { text: 'OPEN', bg: 'bg-success' };
+      case 'Extended':
+        return { text: 'EXTENDED', bg: 'bg-warning text-dark' };
+      case 'Upcoming':
+        return { text: 'COMING SOON', bg: 'bg-info text-white' };
+      default:
+        return { text: 'NEW', bg: 'bg-theme-red' };
+    }
+>>>>>>> Stashed changes
   };
 
   return (
@@ -159,7 +208,7 @@ const Home = () => {
             <h2 className="fw-bold m-0">Our Featured Courses</h2>
             <Link to="/courses" className="text-decoration-none fw-semibold text-dark">View All <i className="bi bi-arrow-right"></i></Link>
           </div>
-          
+
           <div className="row g-4">
             {loadingCourses ? (
               <div className="col-12 text-center py-4"><p className="text-muted">Loading featured courses...</p></div>
@@ -187,7 +236,7 @@ const Home = () => {
         <div className="container py-4">
           <div className="row align-items-center bg-light rounded-4 shadow-sm overflow-hidden" data-aos="zoom-in" data-aos-duration="1000">
             <div className="col-lg-5 p-5 text-center text-lg-start">
-              <h2 className="fw-bold mb-3">Make an Impact.<br/>Join as a Volunteer!</h2>
+              <h2 className="fw-bold mb-3">Make an Impact.<br />Join as a Volunteer!</h2>
               <p className="lead text-muted mb-4">
                 Become a part of the TrioSLK community. Gain real-world experience, build your network, and help us create unforgettable educational programs.
               </p>
@@ -201,7 +250,11 @@ const Home = () => {
       </section>
 
       {/* UPCOMING EVENTS SECTION */}
+<<<<<<< Updated upstream
       <section className="py-5 bg-white">
+=======
+      <section className="py-5 bg-white border-top">
+>>>>>>> Stashed changes
         <div className="container py-4">
           <div className="d-flex justify-content-between align-items-end mb-4" data-aos="fade-right">
             <h2 className="fw-bold m-0">Upcoming Events & Batches</h2>
@@ -220,9 +273,17 @@ const Home = () => {
                   <div key={event._id} className="col-md-6" data-aos="fade-up" data-aos-delay={index * 200}>
                     <div className="card border-0 shadow-sm modern-card d-flex flex-row overflow-hidden h-100">
                       <div style={{ width: '150px', flexShrink: 0, position: 'relative' }}>
+<<<<<<< Updated upstream
                         <img src={event.imageUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-25"></div>
                         <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded ${badge.bg}`} style={{ fontSize: '0.7rem' }}>{badge.text}</div>
+=======
+                        <img src={event.imageFile} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-10"></div>
+                        <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded shadow-sm ${badge.bg}`} style={{ fontSize: '0.65rem' }}>
+                          {badge.text}
+                        </div>
+>>>>>>> Stashed changes
                       </div>
                       <div className="card-body d-flex flex-column justify-content-center p-4">
                         <h5 className="card-title fw-bold" style={{ fontSize: '1.1rem', marginBottom: '8px' }}>{event.title}</h5>
@@ -239,11 +300,54 @@ const Home = () => {
         </div>
       </section>
 
+<<<<<<< Updated upstream
             {/* 5. FEEDBACK & INQUIRY SECTION */}
+=======
+      {/* APPROVED FEEDBACK SECTION */}
+      <section className="approved-feedback-section py-5 bg-white border-top">
+        <div className="container py-4">
+          <div className="text-center mb-5" data-aos="fade-up">
+            <h2 className="fw-bold">What Our Students Say</h2>
+            <p className="text-muted mb-0">Selected feedback shared by our learners.</p>
+          </div>
+
+          <div className="row g-4">
+            {loadingHomepageFeedbacks ? (
+              <div className="col-12 text-center">
+                <p className="text-muted">Loading feedback...</p>
+              </div>
+            ) : homepageFeedbacks.length === 0 ? (
+              <div className="col-12 text-center">
+                <p className="text-muted">No feedback has been displayed yet.</p>
+              </div>
+            ) : (
+              homepageFeedbacks.map((item, index) => (
+                <div key={item._id} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 150}>
+                  <div className="feedback-display-card h-100">
+                    <div className="feedback-display-top">
+                      <h5 className="mb-1 fw-bold">{item.name}</h5>
+                      <p className="mb-1 text-muted small">{item.course}</p>
+                      <p className="mb-2 feedback-rating">Rating: {item.rating}/5</p>
+                    </div>
+                    <p className="feedback-display-comment">“{item.comment}”</p>
+                    <div className="mt-auto">
+                      <span className="feedback-recommend-badge">
+                        {item.recommend ? 'Recommended' : 'Not Recommended'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* FEEDBACK & INQUIRY SECTION */}
+>>>>>>> Stashed changes
       <section className="feedback-inquiry-section py-5 bg-light">
         <div className="container py-4">
           <div className="row g-4">
-            
             {/* Feedback Form */}
             <div className="col-lg-6" data-aos="fade-right">
               <div className="fi-card h-100">
@@ -430,12 +534,9 @@ const Home = () => {
                 </form>
               </div>
             </div>
-
           </div>
         </div>
       </section>
-
-
     </div>
   );
 };

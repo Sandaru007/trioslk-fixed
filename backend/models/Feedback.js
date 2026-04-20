@@ -38,6 +38,10 @@ const feedbackSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    showOnHomepage: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
