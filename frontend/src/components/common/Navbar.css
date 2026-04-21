@@ -16,6 +16,10 @@
   padding-bottom: 5px;
 }
 
+[data-bs-theme="dark"] .nav-link {
+  color: #f8f9fa !important;
+}
+
 .nav-link:hover {
   color: var(--trioslk-red) !important;
 }

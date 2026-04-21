@@ -25,7 +25,65 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f8f9fa; /* A very light gray background */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* GLOBAL DARK MODE OVERRIDES */
+[data-bs-theme="dark"] {
+  --trioslk-light-gray: #1f2937;
+  --bs-body-bg: #111827;
+  --bs-body-color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] body {
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+}
+
+/* Force hardcoded white backgrounds to be dark */
+[data-bs-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .fi-card,
+[data-bs-theme="dark"] .modern-card,
+[data-bs-theme="dark"] .feedback-display-card,
+[data-bs-theme="dark"] .approved-feedback-section,
+[data-bs-theme="dark"] .volunteer-section,
+[data-bs-theme="dark"] .feedback-inquiry-section,
+[data-bs-theme="dark"] .event-card,
+[data-bs-theme="dark"] .course-card,
+[data-bs-theme="dark"] .value-card,
+[data-bs-theme="dark"] .approach-section {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: var(--bs-body-color) !important;
+  border-color: #374151 !important;
+}
+
+/* Ensure text is white and readable */
+[data-bs-theme="dark"] p,
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6,
+[data-bs-theme="dark"] span,
+[data-bs-theme="dark"] li,
+[data-bs-theme="dark"] .feedback-display-comment,
+[data-bs-theme="dark"] .text-muted {
+  color: #f8f9fa !important;
+}
+
+/* Form inputs in dark mode */
+[data-bs-theme="dark"] input,
+[data-bs-theme="dark"] textarea,
+[data-bs-theme="dark"] select,
+[data-bs-theme="dark"] .fi-input,
+[data-bs-theme="dark"] .fi-textarea {
+  background-color: #374151 !important;
+  color: #ffffff !important;
+  border-color: #4b5563 !important;
 }
 
 /* GLOBAL IMAGE HEADER STYLES */
