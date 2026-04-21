@@ -12,6 +12,8 @@ import UserManagement from './UserManagement';
 import AdminOverview from './AdminOverview';
 import EventManagement from './EventManagement';
 import FinancialReport from './FinancialReport';
+// Assuming your team member creates this file:
+// import SessionManagement from './SessionManagement'; 
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -30,7 +32,7 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // 2. Fetch Session Feedbacks
+  // 2. Fetch Session Feedbacks (Now called when 'feedback' tab is active)
   const fetchFeedbacks = useCallback(async () => {
     try {
       setLoadingFeedback(true);
@@ -74,9 +76,9 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Effect for Session Management
+  // FIXED: Now triggers when 'feedback' tab is selected
   useEffect(() => {
-    if (activeTab === 'sessions') {
+    if (activeTab === 'feedback') {
       fetchFeedbacks();
     }
   }, [activeTab, fetchFeedbacks]);
@@ -146,10 +148,20 @@ const AdminDashboard = () => {
           {activeTab === 'events' && <EventManagement />}
           {activeTab === 'finance' && <FinancialReport />}
 
+          {/* SESSIONS: Now ready for your team member's component */}
           {activeTab === 'sessions' && (
+            <div className="view-placeholder">
+              <h3>Session Management</h3>
+              <p>The session management system is currently being implemented.</p>
+              {/* Once ready, replace the placeholder with: <SessionManagement /> */}
+            </div>
+          )}
+
+          {/* FEEDBACK: Now contains the feedback management table */}
+          {activeTab === 'feedback' && (
             <div className="session-management-box">
-              <h2>Session Management Feedback</h2>
-              <p className="text-muted small">Manage which user feedback appears on the public website.</p>
+              <h2>Feedback & Inquiries Management</h2>
+              <p className="text-muted small">Manage user feedback and homepage visibility.</p>
               {loadingFeedback ? (
                 <p>Loading feedback data...</p>
               ) : feedbacks.length === 0 ? (
@@ -193,12 +205,6 @@ const AdminDashboard = () => {
                   </table>
                 </div>
               )}
-            </div>
-          )}
-
-          {activeTab === 'feedback' && (
-            <div className="view-placeholder">
-              <h3>Inquiries Section Under Construction</h3>
             </div>
           )}
         </main>
