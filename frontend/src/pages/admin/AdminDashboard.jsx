@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Users, Calendar, BookOpen, CreditCard,
-  MessageSquare, LayoutDashboard, LogOut, Search, Bell, Briefcase
+  Users,
+  Calendar,
+  BookOpen,
+  CreditCard,
+  MessageSquare,
+  LayoutDashboard,
+  LogOut,
+  Search,
+  Bell,
+  Briefcase
 } from 'lucide-react';
 import './AdminDashboard.css';
 import api from '../../services/api';
@@ -15,13 +23,17 @@ import EventManagement from './EventManagement';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingCount, setPendingCount] = useState(0);
+
   const [feedbacks, setFeedbacks] = useState([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
+
+  const [inquiries, setInquiries] = useState([]);
+  const [loadingInquiry, setLoadingInquiry] = useState(false);
 
   const fetchNotifications = async () => {
     try {
       const { data } = await api.get('/volunteers');
-      const pending = (data || []).filter(v => v.status === 'Pending').length;
+      const pending = (data || []).filter((v) => v.status === 'Pending').length;
       setPendingCount(pending);
     } catch (err) {
       console.error('Failed to fetch notifications', err);
@@ -37,6 +49,18 @@ const AdminDashboard = () => {
       console.error('Error fetching feedback', error);
     } finally {
       setLoadingFeedback(false);
+    }
+  };
+
+  const fetchInquiries = async () => {
+    try {
+      setLoadingInquiry(true);
+      const res = await api.get('/inquiries');
+      setInquiries(res.data.data || []);
+    } catch (error) {
+      console.error('Error fetching inquiries', error);
+    } finally {
+      setLoadingInquiry(false);
     }
   };
 
@@ -65,6 +89,20 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteInquiry = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this inquiry?');
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/inquiries/${id}`);
+      fetchInquiries();
+      alert('Inquiry deleted successfully');
+    } catch (error) {
+      console.error('Error deleting inquiry', error);
+      alert('Failed to delete inquiry');
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
 
@@ -76,8 +114,9 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'sessions') {
+    if (activeTab === 'feedback') {
       fetchFeedbacks();
+      fetchInquiries();
     }
   }, [activeTab]);
 
@@ -95,7 +134,9 @@ const AdminDashboard = () => {
     <div className="admin-container">
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
-          <h2>Trioslk <span>Academy</span></h2>
+          <h2>
+            Trioslk <span>Academy</span>
+          </h2>
         </div>
 
         <nav className="sidebar-nav">
@@ -129,9 +170,7 @@ const AdminDashboard = () => {
           <div className="header-profile">
             <div className="notification-badge">
               <Bell size={20} className="icon-badge" />
-              {pendingCount > 0 && (
-                <span className="badge-count">{pendingCount}</span>
-              )}
+              {pendingCount > 0 && <span className="badge-count">{pendingCount}</span>}
             </div>
 
             <div className="user-info">
@@ -149,50 +188,99 @@ const AdminDashboard = () => {
           {activeTab === 'events' && <EventManagement />}
 
           {activeTab === 'sessions' && (
-            <div className="session-management-box">
-              <h2>Session Management Feedback</h2>
-
-              {loadingFeedback ? (
-                <p>Loading feedback...</p>
-              ) : feedbacks.length === 0 ? (
-                <p>No feedback found.</p>
-              ) : (
-                <table className="feedback-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Course</th>
-                      <th>Rating</th>
-                      <th>Comment</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {feedbacks.map((item) => (
-                      <tr key={item._id}>
-                        <td>{item.name}</td>
-                        <td>{item.course}</td>
-                        <td>{item.rating}</td>
-                        <td>{item.comment}</td>
-                        <td>{item.showOnHomepage ? 'Visible' : 'Hidden'}</td>
-                        <td>
-                          <button onClick={() => handleShow(item._id)}>
-                            Show
-                          </button>
-                          <button onClick={() => handleDelete(item._id)}>
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+            <div className="view-placeholder">
+              <h3>Section Under Construction</h3>
             </div>
           )}
 
-          {['finance', 'feedback'].includes(activeTab) && (
+          {activeTab === 'feedback' && (
+            <div className="session-management-box">
+              <h2>Feedback & Inquiries Management</h2>
+
+              <div style={{ marginBottom: '40px' }}>
+                <h3 style={{ marginBottom: '15px' }}>Feedback</h3>
+
+                {loadingFeedback ? (
+                  <p>Loading feedback...</p>
+                ) : feedbacks.length === 0 ? (
+                  <p>No feedback found.</p>
+                ) : (
+                  <table className="feedback-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {feedbacks.map((item) => (
+                        <tr key={item._id}>
+                          <td>{item.name}</td>
+                          <td>{item.course}</td>
+                          <td>{item.rating}</td>
+                          <td>{item.comment}</td>
+                          <td>{item.showOnHomepage ? 'Visible' : 'Hidden'}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <button onClick={() => handleShow(item._id)}>Show</button>
+                              <button onClick={() => handleDelete(item._id)}>Delete</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              <div>
+                <h3 style={{ marginBottom: '15px' }}>Inquiries</h3>
+
+                {loadingInquiry ? (
+                  <p>Loading inquiries...</p>
+                ) : inquiries.length === 0 ? (
+                  <p>No inquiries found.</p>
+                ) : (
+                  <table className="feedback-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Category</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {inquiries.map((item) => (
+                        <tr key={item._id}>
+                          <td>{item.name}</td>
+                          <td>{item.email}</td>
+                          <td>{item.category}</td>
+                          <td>{item.message}</td>
+                          <td>{item.status}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                              <button onClick={() => handleDeleteInquiry(item._id)}>
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'finance' && (
             <div className="view-placeholder">
               <h3>Section Under Construction</h3>
             </div>
