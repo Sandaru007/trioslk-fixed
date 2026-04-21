@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const LecturerSchema = new mongoose.Schema({
+  accessLevel: { type: String, enum: ['Lecturer', 'Senior Lecturer', 'Admin'], default: 'Lecturer' },
   lecturerId: { type: String, unique: true },
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },

@@ -37,6 +37,7 @@ const getLecturers = async (req, res) => {
 // @desc    Update lecturer details
 // @route   PUT /api/employees/:id
 const updateLecturer = async (req, res) => {
+  console.log("PUT Request Body:", req.body); // <--- Add this!
   try {
     const updated = await Lecturer.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updated);
