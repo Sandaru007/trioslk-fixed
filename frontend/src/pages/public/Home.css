@@ -1,11 +1,10 @@
-
 .hero-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(17, 24, 39, 0.7); /* Dark overlay to make text readable */
+  background-color: rgba(17, 24, 39, 0.7);
   z-index: 1;
 }
 
@@ -23,7 +22,7 @@
 
 .modern-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Volunteer CTA Section */
@@ -37,21 +36,43 @@
   background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
 }
 
+.feedback-inquiry-section .row {
+  justify-content: center;
+  row-gap: 24px;
+}
+
 .fi-card {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
   border: 1px solid #f1f1f1;
   display: flex;
   flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.fi-title {
+  font-size: 1.8rem;
+}
+
+.fi-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.fi-form .mb-2,
+.fi-form .mb-3 {
+  margin-bottom: 12px !important;
 }
 
 .fi-input {
-  height: 54px;
-  border-radius: 14px;
+  height: 44px;
+  border-radius: 12px;
   border: 1px solid #dcdcdc;
-  padding: 0 16px;
+  padding: 0 14px;
+  font-size: 14px;
   box-shadow: none;
 }
 
@@ -62,20 +83,25 @@
 }
 
 .fi-textarea {
-  border-radius: 16px;
+  min-height: 110px;
+  border-radius: 14px;
   border: 1px solid #dcdcdc;
-  padding: 14px 16px;
-  resize: none;
+  padding: 12px 14px;
+  resize: vertical;
   box-shadow: none;
+  font-size: 14px;
 }
 
-@media (max-width: 991px) {
-  .fi-card {
-    padding: 24px;
-  }
+.fi-radio-group {
+  padding-top: 4px;
 }
 
+.fi-btn {
+  min-height: 44px;
+  font-size: 15px;
+}
 
+/* Approved Feedback Section */
 .approved-feedback-section {
   background: #ffffff;
 }
@@ -119,4 +145,36 @@
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+@media (max-width: 991px) {
+  .fi-card {
+    padding: 18px;
+    max-width: 100%;
+  }
+
+  .fi-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .fi-card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .fi-input {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .fi-textarea {
+    font-size: 13px;
+  }
+
+  .fi-btn {
+    min-height: 42px;
+    font-size: 14px;
+  }
 }

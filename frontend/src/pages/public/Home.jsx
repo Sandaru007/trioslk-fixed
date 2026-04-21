@@ -25,29 +25,88 @@ const Home = () => {
     message: '',
   });
 
+  const [feedbackErrors, setFeedbackErrors] = useState({});
+  const [inquiryErrors, setInquiryErrors] = useState({});
+
   const [recentEvents, setRecentEvents] = useState([]);
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingCourses, setLoadingCourses] = useState(true);
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
+
     setFeedbackData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+
+    setFeedbackErrors((prev) => ({
+      ...prev,
+      [name]: '',
     }));
   };
 
   const handleInquiryChange = (e) => {
     const { name, value } = e.target;
+
     setInquiryData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    setInquiryErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
+  };
+
+  const validateFeedbackForm = () => {
+    const errors = {};
+
+    if (!feedbackData.name.trim()) errors.name = 'Name is required';
+
+    if (!feedbackData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(feedbackData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!feedbackData.course.trim()) errors.course = 'Course name is required';
+    if (!feedbackData.rating) errors.rating = 'Please select a rating';
+    if (!feedbackData.comment.trim()) errors.comment = 'Comment is required';
+
+    setFeedbackErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateInquiryForm = () => {
+    const errors = {};
+
+    if (!inquiryData.name.trim()) errors.name = 'Name is required';
+
+    if (!inquiryData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(inquiryData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (!inquiryData.category) errors.category = 'Please select a category';
+    if (!inquiryData.message.trim()) errors.message = 'Message is required';
+
+    setInquiryErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateFeedbackForm()) return;
 
     try {
       const response = await fetch('http://localhost:8000/api/feedback', {
@@ -78,6 +137,8 @@ const Home = () => {
         comment: '',
         recommend: 'false',
       });
+
+      setFeedbackErrors({});
     } catch (error) {
       alert(error.message);
     }
@@ -85,6 +146,8 @@ const Home = () => {
 
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateInquiryForm()) return;
 
     try {
       const response = await fetch('http://localhost:8000/api/inquiries', {
@@ -109,6 +172,8 @@ const Home = () => {
         category: '',
         message: '',
       });
+
+      setInquiryErrors({});
     } catch (error) {
       alert(error.message);
     }
@@ -163,15 +228,33 @@ const Home = () => {
   return (
     <div>
       {/* HERO SECTION */}
-      <section className="page-header-bg" style={{ backgroundImage: `url(${homeImg})` }}>
+      <section
+        className="page-header-bg"
+        style={{ backgroundImage: `url(${homeImg})` }}
+      >
         <div className="header-right-overlay"></div>
-        <div className="container header-content d-flex justify-content-end text-end text-white" data-aos="fade-up">
+        <div
+          className="container header-content d-flex justify-content-end text-end text-white"
+          data-aos="fade-up"
+        >
           <div style={{ maxWidth: '600px' }}>
             <h1 className="display-3 fw-bold mb-4">Empowering Young Minds</h1>
-            <p className="lead fs-4 mb-5">Learn. Create. Lead. Join the TrioSLK Academy.</p>
+            <p className="lead fs-4 mb-5">
+              Learn. Create. Lead. Join the TrioSLK Academy.
+            </p>
             <div className="d-flex justify-content-end gap-3">
-              <Link to="/courses" className="btn btn-theme-red btn-lg rounded-pill px-5 shadow">Explore Courses</Link>
-              <Link to="/about" className="btn btn-outline-light btn-lg rounded-pill px-5">About Us</Link>
+              <Link
+                to="/courses"
+                className="btn btn-theme-red btn-lg rounded-pill px-5 shadow"
+              >
+                Explore Courses
+              </Link>
+              <Link
+                to="/about"
+                className="btn btn-outline-light btn-lg rounded-pill px-5"
+              >
+                About Us
+              </Link>
             </div>
           </div>
         </div>
@@ -180,21 +263,40 @@ const Home = () => {
       {/* FEATURED COURSES SECTION */}
       <section className="py-5 bg-white">
         <div className="container py-4">
-          <div className="d-flex justify-content-between align-items-end mb-4" data-aos="fade-right">
+          <div
+            className="d-flex justify-content-between align-items-end mb-4"
+            data-aos="fade-right"
+          >
             <h2 className="fw-bold m-0">Our Featured Courses</h2>
-            <Link to="/courses" className="text-decoration-none fw-semibold text-dark">View All <i className="bi bi-arrow-right"></i></Link>
+            <Link to="/courses" className="text-decoration-none fw-semibold text-dark">
+              View All <i className="bi bi-arrow-right"></i>
+            </Link>
           </div>
 
           <div className="row g-4">
             {loadingCourses ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">Loading featured courses...</p></div>
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">Loading featured courses...</p>
+              </div>
             ) : featuredCourses.length === 0 ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">No courses available right now.</p></div>
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">No courses available right now.</p>
+              </div>
             ) : (
               featuredCourses.map((course, index) => (
-                <div key={course._id} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 150}>
+                <div
+                  key={course._id}
+                  className="col-lg-4 col-md-6"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 150}
+                >
                   <div className="card h-100 border-0 shadow-sm modern-card">
-                    <img src={course.imageUrl} alt={course.title} className="card-img-top" style={{ height: '220px', objectFit: 'cover' }} />
+                    <img
+                      src={course.imageUrl}
+                      alt={course.title}
+                      className="card-img-top"
+                      style={{ height: '220px', objectFit: 'cover' }}
+                    />
                     <div className="card-body p-4">
                       <h5 className="card-title fw-bold">{course.title}</h5>
                       <p className="card-text text-muted small">{course.shortDesc}</p>
@@ -210,16 +312,35 @@ const Home = () => {
       {/* VOLUNTEER CTA SECTION */}
       <section className="volunteer-section py-5 bg-white">
         <div className="container py-4">
-          <div className="row align-items-center bg-light rounded-4 shadow-sm overflow-hidden" data-aos="zoom-in" data-aos-duration="1000">
+          <div
+            className="row align-items-center bg-light rounded-4 shadow-sm overflow-hidden"
+            data-aos="zoom-in"
+            data-aos-duration="1000"
+          >
             <div className="col-lg-5 p-5 text-center text-lg-start">
-              <h2 className="fw-bold mb-3">Make an Impact.<br />Join as a Volunteer!</h2>
+              <h2 className="fw-bold mb-3">
+                Make an Impact.
+                <br />
+                Join as a Volunteer!
+              </h2>
               <p className="lead text-muted mb-4">
-                Become a part of the TrioSLK community. Gain real-world experience, build your network, and help us create unforgettable educational programs.
+                Become a part of the TrioSLK community. Gain real-world experience,
+                build your network, and help us create unforgettable educational programs.
               </p>
-              <Link to="/volunteer" className="btn btn-theme-red btn-lg rounded-pill px-5 shadow-sm">Register as Volunteer</Link>
+              <Link
+                to="/volunteer"
+                className="btn btn-theme-red btn-lg rounded-pill px-5 shadow-sm"
+              >
+                Register as Volunteer
+              </Link>
             </div>
             <div className="col-lg-7 p-0 d-none d-lg-block">
-              <img src={volunteerImpactImg} alt="TrioSLK Volunteers in Action" className="img-fluid w-100 h-100" style={{ objectFit: 'cover', minHeight: '400px' }} />
+              <img
+                src={volunteerImpactImg}
+                alt="TrioSLK Volunteers in Action"
+                className="img-fluid w-100 h-100"
+                style={{ objectFit: 'cover', minHeight: '400px' }}
+              />
             </div>
           </div>
         </div>
@@ -228,34 +349,64 @@ const Home = () => {
       {/* UPCOMING EVENTS SECTION */}
       <section className="py-5 bg-white border-top">
         <div className="container py-4">
-          <div className="d-flex justify-content-between align-items-end mb-4" data-aos="fade-right">
+          <div
+            className="d-flex justify-content-between align-items-end mb-4"
+            data-aos="fade-right"
+          >
             <h2 className="fw-bold m-0">Latest Events & Batches</h2>
-            <Link to="/events" className="text-decoration-none fw-semibold text-dark">All Events <i className="bi bi-arrow-right"></i></Link>
+            <Link to="/events" className="text-decoration-none fw-semibold text-dark">
+              All Events <i className="bi bi-arrow-right"></i>
+            </Link>
           </div>
 
           <div className="row g-4">
             {loadingEvents ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">Syncing latest events...</p></div>
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">Syncing latest events...</p>
+              </div>
             ) : recentEvents.length === 0 ? (
-              <div className="col-12 text-center py-4"><p className="text-muted">No active events at the moment. Check back soon!</p></div>
+              <div className="col-12 text-center py-4">
+                <p className="text-muted">No active events at the moment. Check back soon!</p>
+              </div>
             ) : (
               recentEvents.map((event, index) => {
                 const badge = getBadgeConfig(event.status);
+
                 return (
-                  <div key={event._id} className="col-md-6" data-aos="fade-up" data-aos-delay={index * 200}>
+                  <div
+                    key={event._id}
+                    className="col-md-6"
+                    data-aos="fade-up"
+                    data-aos-delay={index * 200}
+                  >
                     <div className="card border-0 shadow-sm modern-card d-flex flex-row overflow-hidden h-100">
                       <div style={{ width: '150px', flexShrink: 0, position: 'relative' }}>
-                        <img src={event.imageFile} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img
+                          src={event.imageFile}
+                          alt={event.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
                         <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-10"></div>
-                        <div className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded shadow-sm ${badge.bg}`} style={{ fontSize: '0.65rem' }}>
+                        <div
+                          className={`position-absolute top-0 start-0 m-2 text-white fw-bold px-2 py-1 rounded shadow-sm ${badge.bg}`}
+                          style={{ fontSize: '0.65rem' }}
+                        >
                           {badge.text}
                         </div>
                       </div>
+
                       <div className="card-body d-flex flex-column justify-content-center p-4">
-                        <small className="text-primary fw-bold text-uppercase" style={{ fontSize: '0.7rem' }}>{event.eventId}</small>
+                        <small
+                          className="text-primary fw-bold text-uppercase"
+                          style={{ fontSize: '0.7rem' }}
+                        >
+                          {event.eventId}
+                        </small>
                         <h5 className="card-title fw-bold mb-1">{event.title}</h5>
                         <p className="card-text text-muted mb-0 small lh-base">
-                          {event.description.length > 80 ? event.description.substring(0, 80) + '...' : event.description}
+                          {event.description.length > 80
+                            ? `${event.description.substring(0, 80)}...`
+                            : event.description}
                         </p>
                       </div>
                     </div>
@@ -286,14 +437,23 @@ const Home = () => {
               </div>
             ) : (
               homepageFeedbacks.map((item, index) => (
-                <div key={item._id} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 150}>
-                  <div className="feedback-display-card h-100">
+                <div
+                  key={item._id}
+                  className="col-lg-4 col-md-6"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 150}
+                >
+                  <div className="feedback-display-card h-100 p-4 shadow-sm border rounded">
                     <div className="feedback-display-top">
                       <h5 className="mb-1 fw-bold">{item.name}</h5>
                       <p className="mb-1 text-muted small">{item.course}</p>
                       <p className="mb-2 feedback-rating">Rating: {item.rating}/5</p>
                     </div>
-                    <p className="feedback-display-comment">“{item.comment}”</p>
+
+                    <p className="feedback-display-comment">
+                      “{item.comment}”
+                    </p>
+
                     <div className="mt-auto">
                       <span className="feedback-recommend-badge">
                         {item.recommend ? 'Recommended' : 'Not Recommended'}
@@ -330,6 +490,9 @@ const Home = () => {
                       onChange={handleFeedbackChange}
                       required
                     />
+                    {feedbackErrors.name && (
+                      <small className="text-danger">{feedbackErrors.name}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -342,6 +505,9 @@ const Home = () => {
                       onChange={handleFeedbackChange}
                       required
                     />
+                    {feedbackErrors.email && (
+                      <small className="text-danger">{feedbackErrors.email}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -354,6 +520,9 @@ const Home = () => {
                       onChange={handleFeedbackChange}
                       required
                     />
+                    {feedbackErrors.course && (
+                      <small className="text-danger">{feedbackErrors.course}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -371,6 +540,9 @@ const Home = () => {
                       <option value="4">4 - Very Good</option>
                       <option value="5">5 - Excellent</option>
                     </select>
+                    {feedbackErrors.rating && (
+                      <small className="text-danger">{feedbackErrors.rating}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -383,6 +555,9 @@ const Home = () => {
                       onChange={handleFeedbackChange}
                       required
                     ></textarea>
+                    {feedbackErrors.comment && (
+                      <small className="text-danger">{feedbackErrors.comment}</small>
+                    )}
                   </div>
 
                   <div className="mb-4">
@@ -423,7 +598,10 @@ const Home = () => {
                     </div>
                   </div>
 
-                  <button type="submit" className="btn btn-theme-red w-100 rounded-pill py-3 fw-semibold mt-auto">
+                  <button
+                    type="submit"
+                    className="btn btn-theme-red w-100 rounded-pill py-3 fw-semibold mt-auto"
+                  >
                     Submit Feedback
                   </button>
                 </form>
@@ -449,6 +627,9 @@ const Home = () => {
                       onChange={handleInquiryChange}
                       required
                     />
+                    {inquiryErrors.name && (
+                      <small className="text-danger">{inquiryErrors.name}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -461,6 +642,9 @@ const Home = () => {
                       onChange={handleInquiryChange}
                       required
                     />
+                    {inquiryErrors.email && (
+                      <small className="text-danger">{inquiryErrors.email}</small>
+                    )}
                   </div>
 
                   <div className="mb-3">
@@ -477,6 +661,9 @@ const Home = () => {
                       <option value="Technical">Technical</option>
                       <option value="Volunteer">Volunteer</option>
                     </select>
+                    {inquiryErrors.category && (
+                      <small className="text-danger">{inquiryErrors.category}</small>
+                    )}
                   </div>
 
                   <div className="mb-4">
@@ -489,9 +676,15 @@ const Home = () => {
                       onChange={handleInquiryChange}
                       required
                     ></textarea>
+                    {inquiryErrors.message && (
+                      <small className="text-danger">{inquiryErrors.message}</small>
+                    )}
                   </div>
 
-                  <button type="submit" className="btn btn-theme-red w-100 rounded-pill py-3 fw-semibold mt-auto">
+                  <button
+                    type="submit"
+                    className="btn btn-theme-red w-100 rounded-pill py-3 fw-semibold mt-auto"
+                  >
                     Submit Inquiry
                   </button>
                 </form>
