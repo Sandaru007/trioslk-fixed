@@ -14,10 +14,8 @@ const EmployeeManagement = () => {
 
   const API_URL = 'http://localhost:8000/api/employees';
 
-  // 1. Fetch all employees on load
   useEffect(() => {
     fetchEmployees();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchEmployees = async () => {
@@ -30,106 +28,220 @@ const EmployeeManagement = () => {
     }
   };
 
-  // 2. Handle Form Input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 3. Register New Lecturer
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Convert comma strings to arrays for the backend
       const dataToSend = {
         ...formData,
-        specialization: formData.specialization.split(','),
-        qualifications: formData.qualifications.split(',')
+        specialization: formData.specialization.split(',').map(s => s.trim()),
+        qualifications: formData.qualifications.split(',').map(q => q.trim())
       };
       await axios.post(API_URL, dataToSend);
       alert("Lecturer Registered!");
       setFormData({ fullName: '', email: '', specialization: '', qualifications: '', accessLevel: 'Lecturer' });
       fetchEmployees();
-    } catch  {
+    } catch {
       alert("Error registering lecturer");
     }
   };
 
-  // 4. Update Status (Resigned/Active) or Access
   const updateStatus = async (id, updates) => {
-    try {
-      await axios.put(`${API_URL}/${id}`, updates);
-      fetchEmployees();
-    } catch  {
-      alert("Update failed");
+  // 1. Update the UI locally first so the dropdown actually changes
+  setEmployees(prevEmployees => 
+    prevEmployees.map(emp => 
+      emp._id === id ? { ...emp, ...updates } : emp
+    )
+  );
+
+  try {
+    // 2. Send the update to the server
+    await axios.put(`${API_URL}/${id}`, updates);
+    
+    // 3. Optional: Refresh from server to ensure sync
+    // fetchEmployees(); 
+  } catch (err) {
+    alert("Update failed. Reverting changes...");
+    fetchEmployees(); // Rollback to original data if server fails
+  }
+  };
+
+  // --- STYLES OBJECT ---
+  const styles = {
+    container: {
+      padding: '40px 20px',
+      maxWidth: '1100px',
+      margin: 'auto',
+      fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+      backgroundColor: '#f8f9fa',
+      minHeight: '100vh'
+    },
+    header: {
+      color: '#2c3e50',
+      marginBottom: '30px',
+      fontWeight: '700',
+      borderBottom: '2px solid #dee2e6',
+      paddingBottom: '10px'
+    },
+    card: {
+      background: 'white',
+      padding: '25px',
+      borderRadius: '12px',
+      boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+      marginBottom: '30px',
+      border: '1px solid #e9ecef'
+    },
+    inputGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '15px',
+      marginBottom: '15px'
+    },
+    input: {
+      padding: '12px',
+      borderRadius: '6px',
+      border: '1px solid #ced4da',
+      fontSize: '14px',
+      outline: 'none',
+      transition: 'border-color 0.2s'
+    },
+    button: {
+      padding: '12px 24px',
+      background: '#4a90e2',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '15px',
+      transition: 'background 0.3s'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'separate',
+      borderSpacing: '0 10px',
+    },
+    th: {
+      padding: '15px',
+      textAlign: 'left',
+      color: '#6c757d',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      fontSize: '12px',
+      letterSpacing: '1px'
+    },
+    tr: {
+      background: 'white',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+      borderRadius: '8px'
+    },
+    td: {
+      padding: '15px',
+      borderTop: '1px solid #f1f3f5',
+      borderBottom: '1px solid #f1f3f5'
+    },
+    badge: {
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '11px',
+      fontWeight: 'bold',
+      marginRight: '5px',
+      backgroundColor: '#e7f1ff',
+      color: '#007bff'
+    },
+    select: {
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #ced4da',
+      backgroundColor: '#fff'
     }
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1000px', margin: 'auto', fontFamily: 'sans-serif' }}>
-      <h1>Staff & Lecturer Management</h1>
+    <div style={styles.container}>
+      <h1 style={styles.header}>Staff Management Portal</h1>
 
       {/* REGISTRATION FORM */}
-      <section style={{ background: '#f4f4f4', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-        <h3>Register New Lecturer</h3>
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px' }}>
-          <input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} required />
-          <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-          <input name="specialization" placeholder="Specializations (e.g. React, Java)" value={formData.specialization} onChange={handleChange} />
-          <input name="qualifications" placeholder="Qualifications (e.g. BSc, MSc)" value={formData.qualifications} onChange={handleChange} />
+      <section style={styles.card}>
+        <h3 style={{ marginTop: 0, color: '#4a5568' }}>Add New Staff Member</h3>
+        <form onSubmit={handleSubmit}>
+          <div style={styles.inputGrid}>
+            <input style={styles.input} name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} required />
+            <input style={styles.input} name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required />
+            <input style={styles.input} name="specialization" placeholder="Specializations (React, Java...)" value={formData.specialization} onChange={handleChange} />
+            <input style={styles.input} name="qualifications" placeholder="Qualifications (BSc, MSc...)" value={formData.qualifications} onChange={handleChange} />
+          </div>
           
-          <label>Access Level:</label>
-          <select name="accessLevel" value={formData.accessLevel} onChange={handleChange}>
-            <option value="Lecturer">Lecturer (Standard)</option>
-            <option value="Senior Lecturer">Senior Lecturer (Expanded)</option>
-            <option value="Admin">Admin (Full Access)</option>
-          </select>
-          
-          <button type="submit" style={{ padding: '10px', background: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
-            Add Staff Member
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Access Level:</label>
+            <select style={styles.select} name="accessLevel" value={formData.accessLevel} onChange={handleChange}>
+              <option value="Lecturer">Lecturer</option>
+              <option value="Senior Lecturer">Senior Lecturer</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <button type="submit" style={styles.button}>Register Member</button>
+          </div>
         </form>
       </section>
 
       {/* EMPLOYEE LIST TABLE */}
-      <section>
-        <h3>Current Employees</h3>
-        {loading ? <p>Loading...</p> : (
-          <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <section style={styles.card}>
+        <h3 style={{ marginTop: 0, color: '#4a5568' }}>Current Employee Directory</h3>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>Loading records...</div>
+        ) : (
+          <table style={styles.table}>
             <thead>
-              <tr style={{ background: '#eee' }}>
-                <th>Lecturer ID</th>
-                <th>Name</th>
-                <th>Specialization</th>
-                <th>Access</th>
-                <th>Status</th>
-                <th>Actions</th>
+              <tr>
+                <th style={styles.th}>ID</th>
+                <th style={styles.th}>Lecturer Info</th>
+                <th style={styles.th}>Specialization</th>
+                <th style={styles.th}>Access</th>
+                <th style={styles.th}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {employees.map(emp => (
-                <tr key={emp._id} style={{ opacity: emp.status === 'Resigned' ? 0.5 : 1 }}>
-                  <td style={{ fontWeight: 'bold', color: '#007bff' }}>
-                  {emp.lecturerId ? emp.lecturerId : "N/A"}</td>
-                  <td><strong>{emp.fullName}</strong><br/><small>{emp.email}</small></td>
-                  <td>{emp.specialization?.join(', ')}</td>
-                  <td>
+                <tr key={emp._id} style={{ ...styles.tr, opacity: emp.status === 'Resigned' ? 0.6 : 1 }}>
+                  <td style={{ ...styles.td, color: '#4a90e2', fontWeight: 'bold' }}>
+                    {emp.lecturerId || "NEW"}
+                  </td>
+                  <td style={styles.td}>
+                    <div style={{ fontWeight: '600' }}>{emp.fullName}</div>
+                    <div style={{ fontSize: '12px', color: '#6c757d' }}>{emp.email}</div>
+                  </td>
+                  <td style={styles.td}>
+                    {emp.specialization?.map((spec, i) => (
+                      <span key={i} style={styles.badge}>{spec}</span>
+                    ))}
+                  </td>
+                  <td style={styles.td}>
                     <select 
+                      style={styles.select}
                       value={emp.accessLevel || 'Lecturer'} 
                       onChange={(e) => updateStatus(emp._id, { accessLevel: e.target.value })}
                     >
                       <option value="Lecturer">Lecturer</option>
-                      <option value="Senior Lecturer">Senior</option>
+                      <option value="Senior Lecturer">Senior Lecturer</option>
                       <option value="Admin">Admin</option>
                     </select>
                   </td>
-                  <td>{emp.status}</td>
-                  <td>
+                  <td style={styles.td}>
                     {emp.status === 'Active' ? (
-                      <button onClick={() => updateStatus(emp._id, { status: 'Resigned' })} style={{ color: 'red' }}>
-                        Mark Resigned
+                      <button 
+                        onClick={() => updateStatus(emp._id, { status: 'Resigned' })} 
+                        style={{ ...styles.button, background: '#fff', color: '#e74c3c', border: '1px solid #e74c3c', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Deactivate
                       </button>
                     ) : (
-                      <button onClick={() => updateStatus(emp._id, { status: 'Active' })} style={{ color: 'green' }}>
+                      <button 
+                        onClick={() => updateStatus(emp._id, { status: 'Active' })} 
+                        style={{ ...styles.button, background: '#2ecc71', padding: '6px 12px', fontSize: '12px' }}
+                      >
                         Re-activate
                       </button>
                     )}
