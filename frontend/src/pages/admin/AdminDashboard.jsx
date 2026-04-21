@@ -194,91 +194,129 @@ const AdminDashboard = () => {
           )}
 
           {activeTab === 'feedback' && (
-            <div className="session-management-box">
-              <h2>Feedback & Inquiries Management</h2>
+  <div className="management-wrapper">
+    <div className="management-header">
+      <h2>Feedback & Inquiries Management</h2>
+      <p>Manage homepage feedback visibility and user inquiries in one place.</p>
+    </div>
 
-              <div style={{ marginBottom: '40px' }}>
-                <h3 style={{ marginBottom: '15px' }}>Feedback</h3>
+    <div className="management-section">
+      <div className="section-title-row">
+        <h3>Feedback</h3>
+        <span className="section-count">{feedbacks.length} items</span>
+      </div>
 
-                {loadingFeedback ? (
-                  <p>Loading feedback...</p>
-                ) : feedbacks.length === 0 ? (
-                  <p>No feedback found.</p>
-                ) : (
-                  <table className="feedback-table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Course</th>
-                        <th>Rating</th>
-                        <th>Comment</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {feedbacks.map((item) => (
-                        <tr key={item._id}>
-                          <td>{item.name}</td>
-                          <td>{item.course}</td>
-                          <td>{item.rating}</td>
-                          <td>{item.comment}</td>
-                          <td>{item.showOnHomepage ? 'Visible' : 'Hidden'}</td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                              <button onClick={() => handleShow(item._id)}>Show</button>
-                              <button onClick={() => handleDelete(item._id)}>Delete</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+      {loadingFeedback ? (
+        <p className="empty-text">Loading feedback...</p>
+      ) : feedbacks.length === 0 ? (
+        <p className="empty-text">No feedback found.</p>
+      ) : (
+        <div className="table-wrap">
+          <table className="feedback-table modern-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedbacks.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.course}</td>
+                  <td>
+                    <span className="rating-badge">{item.rating}/5</span>
+                  </td>
+                  <td>{item.comment}</td>
+                  <td>
+                    <span className={item.showOnHomepage ? 'status-badge visible' : 'status-badge hidden'}>
+                      {item.showOnHomepage ? 'Visible' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn show-btn"
+                        onClick={() => handleShow(item._id)}
+                      >
+                        Show
+                      </button>
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
 
-              <div>
-                <h3 style={{ marginBottom: '15px' }}>Inquiries</h3>
+    <div className="management-section">
+      <div className="section-title-row">
+        <h3>Inquiries</h3>
+        <span className="section-count">{inquiries.length} items</span>
+      </div>
 
-                {loadingInquiry ? (
-                  <p>Loading inquiries...</p>
-                ) : inquiries.length === 0 ? (
-                  <p>No inquiries found.</p>
-                ) : (
-                  <table className="feedback-table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Category</th>
-                        <th>Message</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {inquiries.map((item) => (
-                        <tr key={item._id}>
-                          <td>{item.name}</td>
-                          <td>{item.email}</td>
-                          <td>{item.category}</td>
-                          <td>{item.message}</td>
-                          <td>{item.status}</td>
-                          <td>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                              <button onClick={() => handleDeleteInquiry(item._id)}>
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          )}
+      {loadingInquiry ? (
+        <p className="empty-text">Loading inquiries...</p>
+      ) : inquiries.length === 0 ? (
+        <p className="empty-text">No inquiries found.</p>
+      ) : (
+        <div className="table-wrap">
+          <table className="feedback-table modern-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inquiries.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.email}</td>
+                  <td>
+                    <span className="category-badge">{item.category}</span>
+                  </td>
+                  <td>{item.message}</td>
+                  <td>
+                    <span className={item.status === 'Resolved' ? 'status-badge resolved' : 'status-badge pending'}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteInquiry(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
           {activeTab === 'finance' && (
             <div className="view-placeholder">
