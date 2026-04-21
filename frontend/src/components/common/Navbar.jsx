@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import { ThemeContext } from '../../context/ThemeContext';
+import { Sun, Moon } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white py-3 border-bottom">
+    <nav className="navbar navbar-expand-lg bg-body py-3 border-bottom transition-theme">
       <div className="container d-flex justify-content-between align-items-center">
         
         {/* Logo */}
@@ -39,8 +43,8 @@ const Navbar = () => {
             </li>
           </ul>
 
-          <div>
-            <Link to="/login" className="btn btn-outline-dark me-2">
+          <div className="d-flex align-items-center">
+            <Link to="/login" className={`btn ${theme === 'dark' ? 'btn-outline-light' : 'btn-outline-dark'} me-2`}>
               Login
             </Link>
             <Link to="/register" className="btn btn-danger">

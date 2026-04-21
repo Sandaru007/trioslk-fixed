@@ -18,7 +18,7 @@ import Register from './pages/public/Register';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Dashboard from './pages/student/Dashboard_Lms';
 import LecturerDashboard from './pages/lecturer/LecturerDashboard';
-
+import ThemeToggle from './components/common/ThemeToggle';
 
 function App() {
   
@@ -48,6 +48,7 @@ function App() {
         <Route path="/lecturer" element={<LecturerDashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
+      <ThemeToggle />
     </Router>
   );
 }
