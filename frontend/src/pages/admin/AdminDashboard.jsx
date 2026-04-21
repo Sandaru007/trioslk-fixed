@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Users, Calendar, BookOpen, CreditCard, 
   MessageSquare, LayoutDashboard, LogOut, Search, Bell, Briefcase 
@@ -16,30 +16,70 @@ import FinancialReport from './FinancialReport';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingCount, setPendingCount] = useState(0);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
 
-  // 1. Logic to fetch notifications
-  const fetchNotifications = async () => {
+  // 1. Fetch Volunteer Notifications
+  const fetchNotifications = useCallback(async () => {
     try {
       const { data } = await api.get('/volunteers');
-      // Only count those with 'Pending' status
       const pending = (data || []).filter(v => v.status === 'Pending').length;
       setPendingCount(pending);
     } catch (err) {
       console.error("Failed to fetch notifications", err);
     }
+  }, []);
+
+  // 2. Fetch Session Feedbacks
+  const fetchFeedbacks = useCallback(async () => {
+    try {
+      setLoadingFeedback(true);
+      const res = await api.get('/feedback');
+      setFeedbacks(res.data.data || []);
+    } catch (error) {
+      console.error('Error fetching feedback', error);
+    } finally {
+      setLoadingFeedback(false);
+    }
+  }, []);
+
+  // 3. Feedback Action Handlers
+  const handleShow = async (id) => {
+    try {
+      await api.put(`/feedback/${id}/show`);
+      fetchFeedbacks();
+      alert('Feedback is now visible on homepage');
+    } catch (error) {
+      console.error('Error showing feedback', error);
+      alert('Failed to show feedback');
+    }
   };
 
-  // 2. THE FIX: Initialize and set interval inside useEffect
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this feedback?')) return;
+    try {
+      await api.delete(`/feedback/${id}`);
+      fetchFeedbacks();
+      alert('Feedback deleted successfully');
+    } catch (error) {
+      console.error('Error deleting feedback', error);
+      alert('Failed to delete feedback');
+    }
+  };
+
+  // Effect for Notifications
   useEffect(() => {
-    // eslint-disable-next-line
     fetchNotifications();
-
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000); // Check every 30 seconds
-
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchNotifications]);
+
+  // Effect for Session Management
+  useEffect(() => {
+    if (activeTab === 'sessions') {
+      fetchFeedbacks();
+    }
+  }, [activeTab, fetchFeedbacks]);
 
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -53,16 +93,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-container">
-      {/* SIDEBAR */}
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
           <h2>Trioslk <span>Academy</span></h2>
         </div>
-        
+
         <nav className="sidebar-nav">
           {menuItems.map((item) => (
-            <button 
-              key={item.id} 
+            <button
+              key={item.id}
               className={`nav-btn ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
             >
@@ -80,22 +119,18 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* MAIN SECTION */}
       <div className="admin-main">
         <header className="admin-header">
           <div className="header-search">
             <Search size={18} />
             <input type="text" placeholder="Search anything..." />
           </div>
+
           <div className="header-profile">
-            {/* NOTIFICATION BADGE SECTION */}
             <div className="notification-badge">
               <Bell size={20} className="icon-badge" />
-              {pendingCount > 0 && (
-                <span className="badge-count">{pendingCount}</span>
-              )}
+              {pendingCount > 0 && <span className="badge-count">{pendingCount}</span>}
             </div>
-            
             <div className="user-info">
               <p>Admin Name</p>
               <span>Super Admin</span>
@@ -111,10 +146,59 @@ const AdminDashboard = () => {
           {activeTab === 'events' && <EventManagement />}
           {activeTab === 'finance' && <FinancialReport />}
 
-          {['sessions', 'feedback'].includes(activeTab) && (
+          {activeTab === 'sessions' && (
+            <div className="session-management-box">
+              <h2>Session Management Feedback</h2>
+              <p className="text-muted small">Manage which user feedback appears on the public website.</p>
+              {loadingFeedback ? (
+                <p>Loading feedback data...</p>
+              ) : feedbacks.length === 0 ? (
+                <p>No feedback found.</p>
+              ) : (
+                <div className="feedback-table-wrapper">
+                  <table className="feedback-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {feedbacks.map((item) => (
+                        <tr key={item._id}>
+                          <td>{item.name}</td>
+                          <td>{item.course}</td>
+                          <td>{item.rating} / 5</td>
+                          <td><span className="small">{item.comment}</span></td>
+                          <td>
+                            <span className={item.showOnHomepage ? 'text-success fw-bold' : 'text-muted'}>
+                              {item.showOnHomepage ? 'Visible' : 'Hidden'}
+                            </span>
+                          </td>
+                          <td className="action-cells">
+                            <button className="show-btn" onClick={() => handleShow(item._id)} disabled={item.showOnHomepage}>
+                              Show
+                            </button>
+                            <button className="delete-btn" onClick={() => handleDelete(item._id)}>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'feedback' && (
             <div className="view-placeholder">
-              <h3>Section Under Construction</h3>
-              <p>This module is currently being developed by the team.</p>
+              <h3>Inquiries Section Under Construction</h3>
             </div>
           )}
         </main>
