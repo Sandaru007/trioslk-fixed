@@ -26,7 +26,7 @@ exports.createInquiry = async (req, res) => {
   }
 };
 
-// GET all inquiries (for admin later)
+// GET all inquiries
 exports.getAllInquiries = async (req, res) => {
   try {
     const inquiries = await Inquiry.find().sort({ createdAt: -1 });

@@ -20,6 +20,16 @@ exports.createFeedback = async (req, res) => {
       data: feedback,
     });
   } catch (error) {
+    // HANDLE VALIDATION ERRORS
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err) => err.message);
+
+      return res.status(400).json({
+        success: false,
+        message: messages[0],
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Error submitting feedback',

@@ -1,33 +1,46 @@
 const mongoose = require('mongoose');
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const inquirySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Name is required'],
       trim: true,
     },
+
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is required'],
       trim: true,
       lowercase: true,
+      validate: {
+        validator: function (value) {
+          return emailRegex.test(value);
+        },
+        message: 'Please enter a valid email address',
+      },
     },
+
     category: {
       type: String,
-      required: true,
+      required: [true, 'Category is required'],
       trim: true,
     },
+
     message: {
       type: String,
-      required: true,
+      required: [true, 'Message is required'],
       trim: true,
     },
+
     status: {
       type: String,
       default: 'Pending',
       enum: ['Pending', 'Resolved'],
     },
+
     reply: {
       type: String,
       default: '',
