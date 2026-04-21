@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { Download, DollarSign, CreditCard, CheckCircle, PieChart, Trash2 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './AdminDashboard.css';
 
 const FinancialReport = () => {
     const [payments, setPayments] = useState([]);
+    const [allPayments, setAllPayments] = useState([]);
+    const [activeChartTab, setActiveChartTab] = useState('monthly');
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         month: new Date().getMonth() + 1,
@@ -22,6 +25,8 @@ const FinancialReport = () => {
         try {
             setLoading(true);
             const { data } = await api.get('/payments');
+            
+            setAllPayments(data);
 
             // Apply filters
             let filteredData = data;
@@ -108,6 +113,53 @@ const FinancialReport = () => {
             return acc;
         }, {})
     };
+
+    // Chart Data Aggregation
+    const getChartData = () => {
+        const completedPayments = allPayments.filter(p => p.status === 'Completed');
+        
+        if (activeChartTab === 'daily') {
+            const dailyData = {};
+            completedPayments.forEach(p => {
+                const dateKey = new Date(p.date).toISOString().split('T')[0];
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + p.amount;
+            });
+            return Object.entries(dailyData)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .slice(-14) // last 14 active days
+                .map(([dateKey, amount]) => {
+                    const d = new Date(dateKey);
+                    return { name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), Income: amount };
+                });
+        } else if (activeChartTab === 'yearly') {
+            const yearlyData = {};
+            completedPayments.forEach(p => {
+                const year = new Date(p.date).getFullYear();
+                yearlyData[year] = (yearlyData[year] || 0) + p.amount;
+            });
+            return Object.entries(yearlyData)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([year, amount]) => ({ name: year, Income: amount }));
+        } else {
+            // monthly
+            const monthlyData = {};
+            completedPayments.forEach(p => {
+                const d = new Date(p.date);
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthlyData[monthKey] = (monthlyData[monthKey] || 0) + p.amount;
+            });
+            return Object.entries(monthlyData)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .slice(-12) // last 12 active months
+                .map(([monthKey, amount]) => {
+                    const [y, m] = monthKey.split('-');
+                    const date = new Date(y, m - 1);
+                    return { name: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }), Income: amount };
+                });
+        }
+    };
+    
+    const chartData = getChartData();
 
     return (
         <div className="admin-dashboard-container">
@@ -270,6 +322,68 @@ const FinancialReport = () => {
                             </tbody>
                         </table>
                     ) : <div className="no-data-message">No payments found.</div>}
+                </div>
+            </div>
+
+            {/* Smart Income Analysis Section */}
+            <div className="smart-analysis-section">
+                <div className="analysis-header">
+                    <div>
+                        <h3>Smart Income Analysis</h3>
+                        <p>Track your revenue growth across different timeframes</p>
+                    </div>
+                    <div className="chart-tabs">
+                        <div className="chart-tabs-bg">
+                            <div className={`tab-slider slider-${activeChartTab}`}></div>
+                            <button 
+                                className={`chart-tab ${activeChartTab === 'daily' ? 'active' : ''}`}
+                                onClick={() => setActiveChartTab('daily')}
+                            >
+                                Daily
+                            </button>
+                            <button 
+                                className={`chart-tab ${activeChartTab === 'monthly' ? 'active' : ''}`}
+                                onClick={() => setActiveChartTab('monthly')}
+                            >
+                                Monthly
+                            </button>
+                            <button 
+                                className={`chart-tab ${activeChartTab === 'yearly' ? 'active' : ''}`}
+                                onClick={() => setActiveChartTab('yearly')}
+                            >
+                                Yearly
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="chart-container">
+                    {chartData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={350}>
+                            <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 10 }}>
+                                <defs>
+                                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#4318ff" stopOpacity={0.9}/>
+                                        <stop offset="95%" stopColor="#4318ff" stopOpacity={0.6}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e5f2" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#a3aed0', fontSize: 13, fontWeight: 500 }} dy={15} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#a3aed0', fontSize: 13, fontWeight: 500 }} tickFormatter={(value) => `Rs.${value >= 1000 ? (value/1000).toFixed(1)+'k' : value}`} dx={-10} />
+                                <Tooltip 
+                                    cursor={{ fill: 'rgba(67, 24, 255, 0.04)' }}
+                                    contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', padding: '15px 20px' }}
+                                    itemStyle={{ color: '#1b2559', fontWeight: 700, fontSize: '16px' }}
+                                    labelStyle={{ color: '#a3aed0', marginBottom: '5px', fontSize: '14px', fontWeight: 600 }}
+                                />
+                                <Bar dataKey="Income" fill="url(#colorIncome)" radius={[8, 8, 0, 0]} maxBarSize={60} animationDuration={1000} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="no-data-message" style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <p>No income data available to analyze.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
