@@ -194,7 +194,30 @@ const validateVolunteerRegistration = (data) => {
   
   const availabilityVal = validateRequired(data.availability, 'Availability');
   if (!availabilityVal.isValid) errors.availability = availabilityVal.error;
+
   
+  
+  return errors;
+};
+
+const validateLecturerRegistration = (data) => {
+  const errors = {};
+
+  const nameVal = validateTextField(data.fullName, 'Full name', 2, 100);
+  if (!nameVal.isValid) errors.fullName = nameVal.error;
+
+  const emailVal = validateEmail(data.email);
+  if (!emailVal.isValid) errors.email = emailVal.error;
+
+  const nicVal = validateNIC(data.nic);
+  if (!nicVal.isValid) errors.nic = nicVal.error;
+
+  const phoneVal = validatePhone(data.phone);
+  if (!phoneVal.isValid) errors.phone = phoneVal.error;
+
+  const addressVal = validateTextField(data.address, 'Address', 5, 250);
+  if (!addressVal.isValid) errors.address = addressVal.error;
+
   return errors;
 };
 
@@ -213,5 +236,6 @@ module.exports = {
   validateRequired,
   validateStudentRegistration,
   validateVolunteerRegistration,
+  validateLecturerRegistration,
   hasValidationErrors
 };

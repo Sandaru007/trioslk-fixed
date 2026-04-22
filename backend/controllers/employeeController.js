@@ -1,25 +1,56 @@
 const Lecturer = require('../models/Lecturer');
+const sendEmail = require('../utils/sendEmail.js');
+const { validateLecturerRegistration, hasValidationErrors } = require('../controllers/validators.js');
 
 // @desc    Add new lecturer
 // @route   POST /api/employees
 const addLecturer = async (req, res) => {
   try {
-    // --- ID GENERATION LOGIC START ---
-    // Count how many lecturers are currently in the database
+    // 1. Validate Form Data
+    const errors = validateLecturerRegistration(req.body);
+    if (hasValidationErrors(errors)) {
+      return res.status(400).json({ success: false, errors });
+    }
+
+    // 2. ID Generation Logic
     const totalLecturers = await Lecturer.countDocuments();
-    
-    // Create the ID (e.g., if total is 0, first ID is LEC0001)
     const newId = `LEC${(totalLecturers + 1).toString().padStart(4, '0')}`;
     
-    // Add the generated ID to the request body before creating the lecturer
-    const lecturerData = { ...req.body, lecturerId: newId };
-    // --- ID GENERATION LOGIC END ---
+    // 3. Prepare Data (Setting Password as NIC)
+    const lecturerData = { 
+      ...req.body, 
+      lecturerId: newId,
+      password: req.body.nic // Assign NIC as the temporary password
+    };
 
     const newLecturer = new Lecturer(lecturerData);
     const saved = await newLecturer.save();
-    res.status(201).json(saved);
+
+    // 4. Send Email with Credentials
+    const emailOptions = {
+      email: saved.email,
+      subject: 'Welcome to TrioSLK Academy - Lecturer Credentials',
+      message: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #4a90e2;">Welcome to the Team, ${saved.fullName}!</h2>
+          <p>Your lecturer account has been successfully created. You can now login to your dashboard using the credentials below:</p>
+          <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+            <p><strong>Login URL:</strong> http://localhost:5173/login</p>
+            <p><strong>Lecturer ID:</strong> <span style="color: #e74c3c;">${newId}</span></p>
+            <p><strong>Temporary Password:</strong> <span style="color: #e74c3c;">${saved.nic}</span></p>
+          </div>
+          <p style="margin-top: 20px;">Please ensure you change your password after your first login for security purposes.</p>
+          <p>Regards,<br/><strong>TrioSLK Academy Admin Team</strong></p>
+        </div>
+      `
+    };
+
+    await sendEmail(emailOptions);
+
+    res.status(201).json({ success: true, data: saved });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("Error in addLecturer:", err);
+    res.status(400).json({ success: false, message: err.message });
   }
 };
 

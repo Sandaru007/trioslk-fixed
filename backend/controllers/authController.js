@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const Lecturer = require('../models/Lecturer');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 const { validateStudentRegistration } = require('./validators');
@@ -176,6 +177,7 @@ const registerStudent = async (req, res) => {
 // @route   POST /api/auth/login
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
+  
 
   try {
     // 1. Check Admin
@@ -188,7 +190,24 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // 2. Check Student
+    // 2. Check Lecturer (IDs starting with LEC)
+    if (username.startsWith('LEC')) {
+      const lecturer = await Lecturer.findOne({ lecturerId: username });
+      // Since we used NIC as password, we check plain text here
+      if (lecturer && lecturer.nic === password) {
+        if (lecturer.status === 'Resigned') {
+           return res.status(403).json({ message: 'Account deactivated. Contact Admin.' });
+        }
+        return res.json({
+          _id: lecturer._id,
+          name: lecturer.fullName,
+          role: 'lecturer',
+          token: generateToken(lecturer._id, 'lecturer')
+        });
+      }
+    }
+
+    // 3. Check Student
     const student = await Student.findOne({ studentId: username }).select('+password');
     if (student && (await student.matchPassword(password))) {
       return res.json({
