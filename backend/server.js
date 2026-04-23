@@ -4,10 +4,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 
-const path = require('path');
-
 // Load environment variables (Do this before importing routes!)
-dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config();
 
 
 // Connect to Database
