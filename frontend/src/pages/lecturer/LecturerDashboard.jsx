@@ -1,66 +1,100 @@
 import api from '../../services/api';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // For logout
 import { 
-  User, BookOpen, Video, LogOut, Upload, PlusCircle, FileText, Calendar, Clock 
+  User, BookOpen, Video, LogOut, Upload, PlusCircle, FileText, Calendar, Clock, Phone, MapPin, Hash
 } from 'lucide-react';
 import './LecturerDashboard.css';
 
 const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const navigate = useNavigate();
 
-  // --- NEW: File Upload State ---
+  // --- Real Data State ---
+  const [lecturerInfo, setLecturerInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // --- File Upload State ---
   const [uploadForm, setUploadForm] = useState({ courseCode: '', title: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Dummy data for the UI (Backend will replace this later)
-  const lecturerInfo = {
-    name: "Dr. Anura Perera",
-    email: "anura.p@trioslk.com",
-    specialization: ["Event Management", "Public Speaking"],
-    qualifications: "MSc in Management",
-    status: "Active"
+  // --- FETCH LECTURER DATA ON LOAD ---
+  useEffect(() => {
+    const fetchMyData = async () => {
+      try {
+        // Retrieve the user info saved during login
+        const storedInfo = JSON.parse(localStorage.getItem('trioslk_userInfo'));
+        
+        if (!storedInfo || storedInfo.role !== 'lecturer') {
+          navigate('/login'); // Kick them out if not a lecturer
+          return;
+        }
+
+        // We stored their name and ID during login. 
+        // We will fetch the full profile using their specific ID.
+        // NOTE: Make sure the ID you save in login matches what the DB expects!
+        const res = await api.get(`/employees/${storedInfo._id}`); 
+        setLecturerInfo(res.data);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMyData();
+  }, [navigate]);
+
+  // --- LOGOUT HANDLER ---
+  const handleLogout = () => {
+    localStorage.removeItem('trioslk_token');
+    localStorage.removeItem('trioslk_userInfo');
+    navigate('/login');
   };
 
-  // --- NEW: The FormData Submit Function ---
+  // --- MATERIAL UPLOAD HANDLER ---
   const handleMaterialUpload = async (e) => {
     e.preventDefault();
     if (!selectedFile) return alert("Please select a file to upload!");
     if (!uploadForm.courseCode || !uploadForm.title) return alert("Please fill in all fields!");
 
-    // 1. Create the FormData object
     const formData = new FormData();
-    formData.append('file', selectedFile); // The actual physical file
+    formData.append('file', selectedFile); 
     formData.append('title', uploadForm.title);
-    formData.append('courseCode', uploadForm.courseCode); // The "glue" to the course
+    formData.append('courseCode', uploadForm.courseCode); 
 
     try {
       setIsUploading(true);
-      
-      // 2. Send it to the backend! Notice the special header.
       await api.post('/materials', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' } // Crucial for Multer!
+        headers: { 'Content-Type': 'multipart/form-data' } 
       });
-
       alert("Material uploaded successfully!");
-      
-      // Clear the form
       setUploadForm({ courseCode: '', title: '' });
       setSelectedFile(null);
-      
-      // Note: If you have a fetchMaterials() function later, call it here!
-
     } catch (error) {
-      console.error("Upload failed details:", error.response || error);
-      
-      // Extract the exact error message sent from the Node backend!
       const errorMessage = error.response?.data?.error || error.response?.data?.message || "Something broke on the server!";
-      
       alert(`Backend Error: ${errorMessage}`);
     } finally {
       setIsUploading(false);
     }
   };
+
+  // Helper to get initials for the avatar if no photo exists
+  const getInitials = (name) => {
+    if (!name) return "L";
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  // If still loading, show a loading spinner
+  if (isLoading) {
+    return <div className="text-center mt-5 p-5">Loading Dashboard...</div>;
+  }
+
+  // If data fails to load
+  if (!lecturerInfo) {
+    return <div className="text-center mt-5 p-5 text-danger">Failed to load profile. Please log in again.</div>;
+  }
 
   return (
     <div className="lecturer-container">
@@ -68,9 +102,19 @@ const LecturerDashboard = () => {
       {/* SIDEBAR */}
       <aside className="lecturer-sidebar shadow-sm">
         <div className="lecturer-profile-widget">
-          <div className="lecturer-avatar">AP</div>
-          <h5 className="fw-bold mb-1">{lecturerInfo.name}</h5>
-          <span className="badge bg-light text-dark border">Senior Lecturer</span>
+          {/* Avatar (Uses Real Name Initials) */}
+          <div className="lecturer-avatar">{getInitials(lecturerInfo.fullName)}</div>
+          <h5 className="fw-bold mb-1">{lecturerInfo.fullName}</h5>
+          
+          {/* Dynamic Access Level Badge */}
+          <span className={`badge border ${lecturerInfo.accessLevel === 'Senior Lecturer' ? 'bg-primary' : 'bg-light text-dark'}`}>
+            {lecturerInfo.accessLevel}
+          </span>
+          <br/>
+          {/* Dynamic Status Badge */}
+          <span className={`badge mt-2 ${lecturerInfo.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
+            {lecturerInfo.status}
+          </span>
         </div>
         
         <nav className="lecturer-nav">
@@ -86,7 +130,8 @@ const LecturerDashboard = () => {
         </nav>
 
         <div className="p-3 border-top">
-          <button className="lecturer-nav-btn text-danger">
+          {/* REAL LOGOUT FUNCTION */}
+          <button className="lecturer-nav-btn text-danger w-100" onClick={handleLogout}>
             <LogOut size={20} /> Logout
           </button>
         </div>
@@ -103,31 +148,63 @@ const LecturerDashboard = () => {
               <div className="row">
                 <div className="col-md-8">
                   <h4 className="fw-bold border-bottom pb-2 mb-4">Personal Details</h4>
+                  
+                  {/* DYNAMIC DATA DISPLAY */}
                   <div className="row mb-3">
-                    <div className="col-sm-4 text-muted fw-medium">Full Name</div>
-                    <div className="col-sm-8 fw-bold">{lecturerInfo.name}</div>
+                    <div className="col-sm-4 text-muted fw-medium d-flex align-items-center gap-2"><Hash size={16}/> Lecturer ID</div>
+                    <div className="col-sm-8 fw-bold text-primary">{lecturerInfo.lecturerId}</div>
+                  </div>
+                  <div className="row mb-3">
+                    <div className="col-sm-4 text-muted fw-medium d-flex align-items-center gap-2"><User size={16}/> Full Name</div>
+                    <div className="col-sm-8 fw-bold">{lecturerInfo.fullName}</div>
                   </div>
                   <div className="row mb-3">
                     <div className="col-sm-4 text-muted fw-medium">Email Address</div>
                     <div className="col-sm-8">{lecturerInfo.email}</div>
                   </div>
                   <div className="row mb-3">
+                    <div className="col-sm-4 text-muted fw-medium d-flex align-items-center gap-2"><Phone size={16}/> Phone</div>
+                    <div className="col-sm-8">{lecturerInfo.phone || 'N/A'}</div>
+                  </div>
+                  <div className="row mb-3">
+                    <div className="col-sm-4 text-muted fw-medium">NIC Number</div>
+                    <div className="col-sm-8">{lecturerInfo.nic || 'N/A'}</div>
+                  </div>
+                  <div className="row mb-3">
+                    <div className="col-sm-4 text-muted fw-medium d-flex align-items-center gap-2"><MapPin size={16}/> Address</div>
+                    <div className="col-sm-8">{lecturerInfo.address || 'N/A'}</div>
+                  </div>
+                  <div className="row mb-3">
                     <div className="col-sm-4 text-muted fw-medium">Qualifications</div>
-                    <div className="col-sm-8">{lecturerInfo.qualifications}</div>
+                    <div className="col-sm-8">
+                      {lecturerInfo.qualifications?.length > 0 
+                        ? lecturerInfo.qualifications.join(', ') 
+                        : 'No qualifications listed'}
+                    </div>
                   </div>
                   <div className="row mb-3">
                     <div className="col-sm-4 text-muted fw-medium">Specializations</div>
                     <div className="col-sm-8">
-                      {lecturerInfo.specialization.map((spec, i) => (
-                        <span key={i} className="badge bg-secondary me-2">{spec}</span>
-                      ))}
+                      {lecturerInfo.specialization?.length > 0 ? (
+                        lecturerInfo.specialization.map((spec, i) => (
+                          <span key={i} className="badge bg-secondary me-2">{spec}</span>
+                        ))
+                      ) : (
+                        <span className="text-muted">None listed</span>
+                      )}
                     </div>
                   </div>
                 </div>
+
+                {/* PROFILE PHOTO AREA */}
                 <div className="col-md-4 d-flex flex-column align-items-center justify-content-center bg-light rounded-3 p-4">
-                  <div className="lecturer-avatar mb-3" style={{ width: '120px', height: '120px', fontSize: '48px' }}>AP</div>
-                  <button className="btn btn-outline-secondary btn-sm w-100"><Upload size={16} className="me-2"/>Update Photo</button>
+                  <div className="lecturer-avatar mb-3" style={{ width: '120px', height: '120px', fontSize: '48px', backgroundColor: '#e9ecef', color: '#2c3e50' }}>
+                    {getInitials(lecturerInfo.fullName)}
+                  </div>
+                  <small className="text-muted text-center mb-3">Profile photo feature coming soon</small>
+                  <button className="btn btn-outline-secondary btn-sm w-100" disabled><Upload size={16} className="me-2"/>Update Photo</button>
                 </div>
+
               </div>
             </div>
           </div>
