@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Users, Calendar, BookOpen, CreditCard, 
-  MessageSquare, LayoutDashboard, LogOut, Search, Bell, Briefcase 
+import {
+  Users,
+  Calendar,
+  BookOpen,
+  CreditCard,
+  MessageSquare,
+  LayoutDashboard,
+  LogOut,
+  Search,
+  Bell,
+  Briefcase
 } from 'lucide-react';
 import './AdminDashboard.css';
 import api from '../../services/api';
@@ -18,21 +26,25 @@ import FinancialReport from './FinancialReport';
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingCount, setPendingCount] = useState(0);
+
   const [feedbacks, setFeedbacks] = useState([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
-  // 1. Fetch Volunteer Notifications
+  const [inquiries, setInquiries] = useState([]);
+  const [loadingInquiry, setLoadingInquiry] = useState(false);
+
+  // --- FIXED: Properly wrapped in useCallback ---
   const fetchNotifications = useCallback(async () => {
     try {
       const { data } = await api.get('/volunteers');
-      const pending = (data || []).filter(v => v.status === 'Pending').length;
+      const pending = (data || []).filter((v) => v.status === 'Pending').length;
       setPendingCount(pending);
     } catch (err) {
       console.error("Failed to fetch notifications", err);
     }
   }, []);
 
-  // 2. Fetch Session Feedbacks (Now called when 'feedback' tab is active)
+  // 2. Fetch Session Feedbacks
   const fetchFeedbacks = useCallback(async () => {
     try {
       setLoadingFeedback(true);
@@ -45,7 +57,19 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // 3. Feedback Action Handlers
+  // --- FIXED: Wrapped fetchInquiries in useCallback so it works safely in useEffect ---
+  const fetchInquiries = useCallback(async () => {
+    try {
+      setLoadingInquiry(true);
+      const res = await api.get('/inquiries');
+      setInquiries(res.data.data || []);
+    } catch (error) {
+      console.error('Error fetching inquiries', error);
+    } finally {
+      setLoadingInquiry(false);
+    }
+  }, []);
+
   const handleShow = async (id) => {
     try {
       await api.put(`/feedback/${id}/show`);
@@ -69,19 +93,36 @@ const AdminDashboard = () => {
     }
   };
 
-  // Effect for Notifications
+  const handleDeleteInquiry = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this inquiry?');
+    if (!confirmDelete) return;
+
+    try {
+      await api.delete(`/inquiries/${id}`);
+      fetchInquiries();
+      alert('Inquiry deleted successfully');
+    } catch (error) {
+      console.error('Error deleting inquiry', error);
+      alert('Failed to delete inquiry');
+    }
+  };
+
+  // --- FIXED: Added disable lint comments for intentional data-fetching state updates ---
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // FIXED: Now triggers when 'feedback' tab is selected
   useEffect(() => {
     if (activeTab === 'feedback') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchFeedbacks();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchInquiries();
     }
-  }, [activeTab, fetchFeedbacks]);
+  }, [activeTab, fetchFeedbacks, fetchInquiries]);
 
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -97,7 +138,9 @@ const AdminDashboard = () => {
     <div className="admin-container">
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
-          <h2>Trioslk <span>Academy</span></h2>
+          <h2>
+            Trioslk <span>Academy</span>
+          </h2>
         </div>
 
         <nav className="sidebar-nav">
@@ -151,60 +194,138 @@ const AdminDashboard = () => {
           {/* SESSIONS: Now ready for your team member's component */}
           {activeTab === 'sessions' && (
             <div className="view-placeholder">
-              <h3>Session Management</h3>
-              <p>The session management system is currently being implemented.</p>
-              {/* Once ready, replace the placeholder with: <SessionManagement /> */}
+              <h3>Section Under Construction</h3>
             </div>
           )}
 
-          {/* FEEDBACK: Now contains the feedback management table */}
           {activeTab === 'feedback' && (
-            <div className="session-management-box">
-              <h2>Feedback & Inquiries Management</h2>
-              <p className="text-muted small">Manage user feedback and homepage visibility.</p>
-              {loadingFeedback ? (
-                <p>Loading feedback data...</p>
-              ) : feedbacks.length === 0 ? (
-                <p>No feedback found.</p>
-              ) : (
-                <div className="feedback-table-wrapper">
-                  <table className="feedback-table">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Course</th>
-                        <th>Rating</th>
-                        <th>Comment</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {feedbacks.map((item) => (
-                        <tr key={item._id}>
-                          <td>{item.name}</td>
-                          <td>{item.course}</td>
-                          <td>{item.rating} / 5</td>
-                          <td><span className="small">{item.comment}</span></td>
-                          <td>
-                            <span className={item.showOnHomepage ? 'text-success fw-bold' : 'text-muted'}>
-                              {item.showOnHomepage ? 'Visible' : 'Hidden'}
-                            </span>
-                          </td>
-                          <td className="action-cells">
-                            <button className="show-btn" onClick={() => handleShow(item._id)} disabled={item.showOnHomepage}>
-                              Show
-                            </button>
-                            <button className="delete-btn" onClick={() => handleDelete(item._id)}>
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+  <div className="management-wrapper">
+    <div className="management-header">
+      <h2>Feedback & Inquiries Management</h2>
+      <p>Manage homepage feedback visibility and user inquiries in one place.</p>
+    </div>
+
+    <div className="management-section">
+      <div className="section-title-row">
+        <h3>Feedback</h3>
+        <span className="section-count">{feedbacks.length} items</span>
+      </div>
+
+      {loadingFeedback ? (
+        <p className="empty-text">Loading feedback...</p>
+      ) : feedbacks.length === 0 ? (
+        <p className="empty-text">No feedback found.</p>
+      ) : (
+        <div className="table-wrap">
+          <table className="feedback-table modern-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedbacks.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.course}</td>
+                  <td>
+                    <span className="rating-badge">{item.rating}/5</span>
+                  </td>
+                  <td>{item.comment}</td>
+                  <td>
+                    <span className={item.showOnHomepage ? 'status-badge visible' : 'status-badge hidden'}>
+                      {item.showOnHomepage ? 'Visible' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn show-btn"
+                        onClick={() => handleShow(item._id)}
+                      >
+                        Show
+                      </button>
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDelete(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+
+    <div className="management-section">
+      <div className="section-title-row">
+        <h3>Inquiries</h3>
+        <span className="section-count">{inquiries.length} items</span>
+      </div>
+
+      {loadingInquiry ? (
+        <p className="empty-text">Loading inquiries...</p>
+      ) : inquiries.length === 0 ? (
+        <p className="empty-text">No inquiries found.</p>
+      ) : (
+        <div className="table-wrap">
+          <table className="feedback-table modern-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Category</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inquiries.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.email}</td>
+                  <td>
+                    <span className="category-badge">{item.category}</span>
+                  </td>
+                  <td>{item.message}</td>
+                  <td>
+                    <span className={item.status === 'Resolved' ? 'status-badge resolved' : 'status-badge pending'}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteInquiry(item._id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+          {activeTab === 'finance' && (
+            <div className="view-placeholder">
+              <h3>Section Under Construction</h3>
             </div>
           )}
         </main>
