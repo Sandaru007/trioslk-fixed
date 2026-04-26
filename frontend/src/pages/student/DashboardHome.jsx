@@ -2,6 +2,16 @@ import React from 'react';
 import { GraduationCap, MapPin, MessageSquare, Mic, BookOpenText, Target, ChevronRight, Search } from 'lucide-react';
 
 const DashboardHome = () => {
+  // Get the logged-in user's name from localStorage
+  const userInfo = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('trioslk_userInfo') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  const firstName = userInfo.name ? userInfo.name.split(' ')[0] : 'Student';
+
   // Static data matching the image for now
   const dates = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -14,7 +24,7 @@ const DashboardHome = () => {
         <div className="lms-card welcome-banner">
           <div className="welcome-text">
             <span className="welcome-date">April 20, Tuesday</span>
-            <h2>Welcome back, Kavishka!</h2>
+            <h2>Welcome back, {firstName}!</h2>
             <p>You've finished 80% of your weekly goal!</p>
           </div>
           <GraduationCap size={100} className="cap-icon" color="white" strokeWidth={1} />

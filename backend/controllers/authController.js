@@ -212,7 +212,9 @@ const loginUser = async (req, res) => {
     if (student && (await student.matchPassword(password))) {
       return res.json({
         _id: student._id,
+        studentId: student.studentId,
         name: `${student.firstName} ${student.lastName}`,
+        email: student.email,
         role: 'student',
         token: generateToken(student._id, 'student')
       });

@@ -10,6 +10,15 @@ import logoImg from '../../assets/images/logo.jpg';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Get the logged-in user's info from localStorage
+  const userInfo = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('trioslk_userInfo') || '{}');
+    } catch {
+      return {};
+    }
+  })();
 
   return (
     <div className="student-container">
@@ -81,8 +90,8 @@ const Dashboard = () => {
             <button className="user-profile-btn">
               <img src={profileImg} alt="Diane Nguyen" className="user-avatar" />
               <div className="user-info d-none d-md-block">
-                <span className="user-name">Kavishka Shenal</span>
-                <span className="user-role">Student</span>
+                <span className="user-name">{userInfo.name || 'Student'}</span>
+                <span className="user-role">{userInfo.role ? userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1) : 'Student'}</span>
               </div>
             </button>
           </div>

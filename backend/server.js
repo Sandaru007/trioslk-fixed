@@ -50,8 +50,30 @@ app.get('/', (req, res) => {
   res.send('TrioSLK API is running...');
 });
 
+// --- Global Error Handler ---
+app.use((err, req, res, next) => {
+  const error = err || new Error('Unknown Error');
+  console.error('SERVER ERROR:', error.stack || error.message || error);
+  res.status(error.status || 500).json({
+    success: false,
+    message: error.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? (error.stack || error) : undefined
+  });
+});
+
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Catch unhandled rejections
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION:', err.stack);
+});
+
+// Catch uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err.stack);
+  // Optional: process.exit(1); 
 });

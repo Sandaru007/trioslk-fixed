@@ -41,8 +41,49 @@ const updateStudentStatus = async (req, res) => {
   }
 };
 
+// @desc    Get a specific student by ID (FOR PROFILE)
+// @route   GET /api/students/:id
+const getStudentById = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id).select('-password');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.status(200).json(student);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching student', error: error.message });
+  }
+};
+
+// @desc    Update Student Profile (including optional profilePhoto)
+// @route   PUT /api/students/:id/profile
+const updateStudentProfile = async (req, res) => {
+  console.log('Update Profile Request for ID:', req.params.id);
+  console.log('Body:', req.body);
+  console.log('File:', req.file ? { filename: req.file.filename, path: req.file.path } : 'No file');
+  try {
+    const updateData = { ...req.body };
+    
+    // If multer processed a file, save the Cloudinary path
+    if (req.file && req.file.path) {
+      updateData.profilePhoto = req.file.path;
+    }
+
+    const student = await Student.findByIdAndUpdate(
+      req.params.id, 
+      updateData, 
+      { new: true, runValidators: true }
+    ).select('-password');
+    
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.status(200).json({ message: 'Profile updated successfully', student });
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating profile', error: error.message });
+  }
+};
+
 module.exports = { 
   getStudentCount, 
   getAllStudents, 
-  updateStudentStatus 
+  updateStudentStatus,
+  getStudentById,
+  updateStudentProfile
 };

@@ -322,12 +322,6 @@ const AdminDashboard = () => {
     </div>
   </div>
 )}
-
-          {activeTab === 'finance' && (
-            <div className="view-placeholder">
-              <h3>Section Under Construction</h3>
-            </div>
-          )}
         </main>
       </div>
     </div>

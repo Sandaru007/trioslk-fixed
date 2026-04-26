@@ -97,6 +97,7 @@ const studentSchema = new mongoose.Schema({
       message: 'Parent phone must be in Sri Lankan format (07xxxxxx)'
     }
   },
+  profilePhoto: { type: String, default: '' },
   role: { type: String, default: 'student' }
 }, { timestamps: true });
 
