@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { uploadMaterial, getMaterialsByCourse } = require('../controllers/materialController');
+const { uploadMaterial, getMaterialsByCourse, getAllMaterials } = require('../controllers/materialController');
 
 // 1. Import the upload config tool we made earlier!
 const upload = require('../utils/uploadConfig'); 
@@ -10,5 +10,6 @@ const upload = require('../utils/uploadConfig');
 router.post('/', upload.single('file'), uploadMaterial);
 
 router.get('/course/:courseCode', getMaterialsByCourse);
+router.get('/', getAllMaterials);
 
 module.exports = router;

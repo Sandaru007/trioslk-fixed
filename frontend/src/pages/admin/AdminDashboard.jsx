@@ -12,8 +12,7 @@ import UserManagement from './UserManagement';
 import AdminOverview from './AdminOverview';
 import EventManagement from './EventManagement';
 import FinancialReport from './FinancialReport';
-// Assuming your team member creates this file:
-// import SessionManagement from './SessionManagement'; 
+import SessionManagement from './SessionManagement'; 
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -148,14 +147,8 @@ const AdminDashboard = () => {
           {activeTab === 'events' && <EventManagement />}
           {activeTab === 'finance' && <FinancialReport />}
 
-          {/* SESSIONS: Now ready for your team member's component */}
-          {activeTab === 'sessions' && (
-            <div className="view-placeholder">
-              <h3>Session Management</h3>
-              <p>The session management system is currently being implemented.</p>
-              {/* Once ready, replace the placeholder with: <SessionManagement /> */}
-            </div>
-          )}
+          {/* SESSIONS: Real Component */}
+          {activeTab === 'sessions' && <SessionManagement />}
 
           {/* FEEDBACK: Now contains the feedback management table */}
           {activeTab === 'feedback' && (
