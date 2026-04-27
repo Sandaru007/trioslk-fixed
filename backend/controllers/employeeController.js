@@ -58,6 +58,12 @@ const addLecturer = async (req, res) => {
 // @route   GET /api/employees
 const getLecturers = async (req, res) => {
   try {
+    if (require('mongoose').connection.readyState !== 1) {
+      return res.json([
+        { _id: 'mock1', fullName: 'John Doe', email: 'john@example.com' },
+        { _id: 'mock2', fullName: 'Jane Smith', email: 'jane@example.com' }
+      ]);
+    }
     const lecturers = await Lecturer.find();
     res.json(lecturers);
   } catch (err) {

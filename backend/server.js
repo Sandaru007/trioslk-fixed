@@ -24,6 +24,7 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const assignmentRoutes = require('./routes/assignmentRoutes');
 
 const app = express();
 
@@ -34,6 +35,10 @@ app.use(cors());
 app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads folder
+
+// Add static file serving for uploads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- API Endpoints (shows the server where to send specific requests.) ---
 app.use('/api/employees', employeeRoutes);
@@ -48,6 +53,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/assignments', assignmentRoutes);
 
 app.get('/', (req, res) => {
   res.send('TrioSLK API is running...');
