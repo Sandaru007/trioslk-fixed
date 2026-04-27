@@ -1,12 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path'); // <-- Moved to the top with the other imports
 const connectDB = require('./config/db');
-
 
 // Load environment variables (Do this before importing routes!)
 dotenv.config();
-
 
 // Connect to Database
 connectDB();
@@ -28,16 +27,12 @@ const assignmentRoutes = require('./routes/assignmentRoutes');
 
 const app = express();
 
-const path = require('path');
-
 // --- Middleware ---
 app.use(cors());
 app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads folder
 
-// Add static file serving for uploads
-const path = require('path');
+// Serve uploads folder (Only need this once!)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- API Endpoints (shows the server where to send specific requests.) ---
