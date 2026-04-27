@@ -24,7 +24,7 @@ const Profile = () => {
   // Safely parse user info from localStorage
   const getUserInfo = () => {
     try {
-      const raw = localStorage.getItem('trioslk_userInfo');
+      const raw = sessionStorage.getItem('trioslk_userInfo');
       if (!raw) return null;
       return JSON.parse(raw);
     } catch {
@@ -97,10 +97,23 @@ const Profile = () => {
       });
       
       alert('Profile updated successfully!');
+      const updatedStudentResponse = await api.get(`/students/${userInfo._id}`);
+      const updatedStudent = updatedStudentResponse.data;
+      
+      const updatedUserInfo = {
+        ...userInfo,
+        name: `${updatedStudent.firstName} ${updatedStudent.lastName}`,
+        profilePhoto: updatedStudent.profilePhoto
+      };
+      sessionStorage.setItem('trioslk_userInfo', JSON.stringify(updatedUserInfo));
+
       setIsEditing(false);
       setPhotoFile(null);
       setPhotoPreview(null);
       fetchProfile();
+      
+      // Dispatch a custom event so Dashboard_Lms can pick up the change
+      window.dispatchEvent(new Event('profileUpdated'));
     } catch (error) {
       console.error("Error updating profile", error);
       alert('Failed to update profile');
@@ -111,7 +124,22 @@ const Profile = () => {
   if (errorMsg) return <div className="text-center p-5 text-danger">Error fetching profile: {errorMsg}</div>;
   if (!studentData) return <div className="text-center p-5">Profile not found.</div>;
 
-  const displayImage = studentData.profilePhoto || profileImgPlaceholder;
+  const resolveImageUrl = (url) => {
+    if (!url) return profileImgPlaceholder;
+    if (url.startsWith('http')) return url;
+    
+    // Robustly handle absolute paths containing 'uploads'
+    if (url.includes('\\uploads\\')) {
+      return `http://localhost:8000/uploads/${url.split('\\uploads\\').pop()}`;
+    }
+    if (url.includes('/uploads/')) {
+      return `http://localhost:8000/uploads/${url.split('/uploads/').pop()}`;
+    }
+    
+    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const displayImage = resolveImageUrl(studentData.profilePhoto);
 
   return (
     <div className="animate__animated animate__fadeIn position-relative">

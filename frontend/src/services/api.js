@@ -8,7 +8,7 @@ const api = axios.create({
 // Request interceptor: Add JWT token to headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('trioslk_token');
+    const token = sessionStorage.getItem('trioslk_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +26,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('trioslk_token');
-      localStorage.removeItem('trioslk_userInfo');
+      sessionStorage.removeItem('trioslk_token');
+      sessionStorage.removeItem('trioslk_userInfo');
       window.location.href = '/login?message=SessionExpired';
     }
     return Promise.reject(error);

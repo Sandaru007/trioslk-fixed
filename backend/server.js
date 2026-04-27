@@ -27,10 +27,13 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
+const path = require('path');
+
 // --- Middleware ---
 app.use(cors());
 app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads folder
 
 // --- API Endpoints (shows the server where to send specific requests.) ---
 app.use('/api/employees', employeeRoutes);

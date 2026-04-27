@@ -24,7 +24,7 @@ const LecturerDashboard = () => {
     const fetchMyData = async () => {
       try {
         // Retrieve the user info saved during login
-        const storedInfo = JSON.parse(localStorage.getItem('trioslk_userInfo'));
+        const storedInfo = JSON.parse(sessionStorage.getItem('trioslk_userInfo'));
         
         if (!storedInfo || storedInfo.role !== 'lecturer') {
           navigate('/login'); // Kick them out if not a lecturer
@@ -48,8 +48,8 @@ const LecturerDashboard = () => {
 
   // --- LOGOUT HANDLER ---
   const handleLogout = () => {
-    localStorage.removeItem('trioslk_token');
-    localStorage.removeItem('trioslk_userInfo');
+    sessionStorage.removeItem('trioslk_token');
+    sessionStorage.removeItem('trioslk_userInfo');
     navigate('/login');
   };
 

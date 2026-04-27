@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const Payment = require('../models/Payment');
 
 // @desc    Get total student count (FOR DASHBOARD STATS)
 // @route   GET /api/students/count
@@ -62,9 +63,9 @@ const updateStudentProfile = async (req, res) => {
   try {
     const updateData = { ...req.body };
     
-    // If multer processed a file, save the Cloudinary path
-    if (req.file && req.file.path) {
-      updateData.profilePhoto = req.file.path;
+    // If multer processed a file, save the relative path for static hosting
+    if (req.file) {
+      updateData.profilePhoto = req.file.filename ? `/uploads/${req.file.filename}` : req.file.path;
     }
 
     const student = await Student.findByIdAndUpdate(
@@ -80,10 +81,63 @@ const updateStudentProfile = async (req, res) => {
   }
 };
 
+// @desc    Get enrolled courses for a student
+// @route   GET /api/students/:id/courses
+const getEnrolledCourses = async (req, res) => {
+  try {
+    const studentId = req.params.id; // STU-XXXX
+    const studentIdStr = studentId.trim();
+    // Find payments for this student that are 'Completed'
+    const payments = await Payment.find({ 
+      studentId: new RegExp(`^${studentIdStr}$`, 'i'), 
+      status: 'Completed' 
+    }).populate('courseId');
+    console.log(`Found ${payments.length} completed payments for ${studentId}`);
+    
+    // Extract unique courses
+    const Course = require('../models/Course');
+    
+    // Extract unique courses
+    const coursesMap = new Map();
+    for (const payment of payments) {
+      console.log(`Processing payment ${payment._id}, courseId: ${payment.courseId ? payment.courseId._id : 'null'}`);
+      
+      let courseData = payment.courseId;
+      
+      // If courseId populate failed, try to recover the course by title
+      if (!courseData && payment.courseTitle) {
+         courseData = await Course.findOne({ title: payment.courseTitle });
+      }
+
+      if (courseData && !coursesMap.has(courseData._id.toString())) {
+        const courseObj = courseData.toObject ? courseData.toObject() : courseData;
+        courseObj.paymentStatus = payment.status;
+        courseObj.paymentDate = payment.date;
+        coursesMap.set(courseData._id.toString(), courseObj);
+      } else if (!courseData && !coursesMap.has(payment.courseTitle)) {
+        // Absolute fallback if course truly no longer exists
+        coursesMap.set(payment.courseTitle, {
+           _id: payment._id,
+           title: payment.courseTitle,
+           paymentStatus: payment.status,
+           paymentDate: payment.date
+        });
+      }
+    }
+
+    const enrolledCourses = Array.from(coursesMap.values());
+    console.log(`Returning ${enrolledCourses.length} unique enrolled courses`);
+    res.status(200).json(enrolledCourses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching enrolled courses', error: error.message });
+  }
+};
+
 module.exports = { 
   getStudentCount, 
   getAllStudents, 
   updateStudentStatus,
   getStudentById,
-  updateStudentProfile
+  updateStudentProfile,
+  getEnrolledCourses
 };

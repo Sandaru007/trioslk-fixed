@@ -7,7 +7,8 @@ const {
   getAllStudents, 
   updateStudentStatus,
   getStudentById,
-  updateStudentProfile
+  updateStudentProfile,
+  getEnrolledCourses
 } = require('../controllers/studentController');
 
 // Define the endpoints
@@ -17,6 +18,7 @@ router.put('/:id/status', updateStudentStatus);
 
 // Profile endpoints
 router.get('/:id', getStudentById);
+router.get('/:id/courses', getEnrolledCourses);
 router.put('/:id/profile', upload.single('profilePhoto'), updateStudentProfile);
 
 // Delete a student
