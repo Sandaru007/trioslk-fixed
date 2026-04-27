@@ -36,9 +36,8 @@ app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads folder
 
-// Add static file serving for uploads
-const path = require('path');
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Add static file serving for uploads (already handled above)
+
 
 // --- API Endpoints (shows the server where to send specific requests.) ---
 app.use('/api/employees', employeeRoutes);

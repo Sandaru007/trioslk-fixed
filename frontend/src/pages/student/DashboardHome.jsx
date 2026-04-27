@@ -15,26 +15,87 @@ const DashboardHome = () => {
   const studentId = userInfo.studentId;
 
   const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       if (!studentId) return;
       try {
-        const response = await api.get(`/students/${encodeURIComponent(studentId)}/courses`);
-        setEnrolledCourses(response.data);
+        setLoading(true);
+        
+        // Fetch enrolled courses
+        const coursesRes = await api.get(`/students/${encodeURIComponent(studentId)}/courses`);
+        const enrolled = coursesRes.data;
+        setEnrolledCourses(enrolled);
+        
+        const courseCodes = enrolled.map(c => c.courseCode);
+
+        // Fetch sessions
+        const sessionsRes = await api.get('/sessions');
+        const filteredSessions = sessionsRes.data.filter(s => courseCodes.includes(s.courseCode));
+        setSessions(filteredSessions);
+
+        // Fetch assignments
+        const assignmentsRes = await api.get('/assignments');
+        const filteredAssignments = assignmentsRes.data.filter(a => courseCodes.includes(a.courseCode));
+        setAssignments(filteredAssignments);
+
       } catch (error) {
-        console.error('Error fetching enrolled courses:', error);
+        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourses();
+    fetchData();
   }, [studentId]);
 
-  // Static data matching the image for now
-  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
+  // Calendar logic
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  const monthName = today.toLocaleString('default', { month: 'long' });
+  const formattedToday = today.toLocaleString('default', { month: 'long', day: 'numeric', weekday: 'long' });
+
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  // Adjust for Monday start (0=Mon, 6=Sun)
+  const adjustedFirstDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  
+  const calendarDays = [];
+  // Empty slots for previous month
+  for (let i = 0; i < adjustedFirstDay; i++) {
+    calendarDays.push({ day: null, hasEvent: false });
+  }
+  // Days of current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    // Check if any session or assignment is on this day
+    const hasSession = sessions.some(s => {
+      const sDate = new Date(s.date);
+      return sDate.getDate() === d && sDate.getMonth() === currentMonth && sDate.getFullYear() === currentYear;
+    });
+    const hasAssignment = assignments.some(a => {
+      const aDate = new Date(a.dueDate);
+      return aDate.getDate() === d && aDate.getMonth() === currentMonth && aDate.getFullYear() === currentYear;
+    });
+
+    calendarDays.push({ 
+      day: d, 
+      hasEvent: hasSession || hasAssignment,
+      isToday: d === today.getDate()
+    });
+  }
+
+  // Combine upcoming tasks (Sessions & Assignments)
+  const upcomingTasks = [
+    ...sessions.map(s => ({ ...s, type: 'session', sortDate: new Date(s.date) })),
+    ...assignments.map(a => ({ ...a, type: 'assignment', sortDate: new Date(a.dueDate) }))
+  ]
+  .filter(t => t.sortDate >= new Date().setHours(0,0,0,0)) // Future tasks
+  .sort((a, b) => a.sortDate - b.sortDate)
+  .slice(0, 4);
 
   return (
     <div className="dashboard-grid">
@@ -44,9 +105,9 @@ const DashboardHome = () => {
         {/* Welcome Banner */}
         <div className="lms-card welcome-banner">
           <div className="welcome-text">
-            <span className="welcome-date">April 20, Tuesday</span>
+            <span className="welcome-date">{formattedToday}</span>
             <h2>Welcome back, {firstName}!</h2>
-            <p>You've finished 80% of your weekly goal!</p>
+            <p>Ready to continue your learning journey?</p>
           </div>
           <GraduationCap size={100} className="cap-icon" color="white" strokeWidth={1} />
         </div>
@@ -63,7 +124,6 @@ const DashboardHome = () => {
               <p>Loading courses...</p>
             ) : enrolledCourses.length > 0 ? (
               enrolledCourses.map((course, index) => {
-                // Determine icon color based on index
                 const colors = ['purple', 'orange', 'pink', 'blue', 'green'];
                 const colorClass = colors[index % colors.length];
                 
@@ -73,9 +133,9 @@ const DashboardHome = () => {
                       <BookOpenText size={40} strokeWidth={1.5} />
                     </div>
                     <h5>{course.title || 'Course Title'}</h5>
-                    <span className="course-instructor">Status: Active</span>
+                    <span className="course-instructor">Code: {course.courseCode}</span>
                     <div className="course-progress-bar">
-                      <div className="progress-fill bg-primary" style={{ width: '0%' }}></div>
+                      <div className="progress-fill" style={{ width: '0%' }}></div>
                     </div>
                   </div>
                 );
@@ -89,7 +149,6 @@ const DashboardHome = () => {
         {/* Achievements */}
         <div className="lms-card">
           <h3>Achievements</h3>
-          {/* Placeholder for achievements - add your specific UI here */}
           <p style={{color: 'var(--text-muted)', marginTop: '15px'}}>Your completed certificates will appear here.</p>
         </div>
       </div>
@@ -100,17 +159,17 @@ const DashboardHome = () => {
         <div className="lms-card">
           <h4>My Schedule</h4>
           <div className="calendar-widget mt-3">
-            <div className="calendar-header">December</div>
+            <div className="calendar-header">{monthName} {currentYear}</div>
             <div className="calendar-days-grid">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
                 <div key={day} className="cal-day-label">{day}</div>
               ))}
-              {dates.map(date => (
+              {calendarDays.map((item, index) => (
                 <div 
-                  key={date} 
-                  className={`cal-date ${date === 20 ? 'active' : ''} ${[5, 12, 18, 26].includes(date) ? 'has-event' : ''}`}
+                  key={index} 
+                  className={`cal-date ${item.isToday ? 'active' : ''} ${item.hasEvent ? 'has-event' : ''}`}
                 >
-                  {date}
+                  {item.day}
                 </div>
               ))}
             </div>
@@ -125,32 +184,22 @@ const DashboardHome = () => {
           </div>
 
           <div className="tasks-list">
-            <div className="task-item">
-              <div className="task-icon-status red"><Mic size={18}/></div>
-              <div className="task-details">
-                <span className="task-name">Demo Speech</span>
-                <span className="task-course">Mass Communication</span>
-              </div>
-              <ChevronRight size={18} className="text-muted" />
-            </div>
-
-            <div className="task-item">
-              <div className="task-icon-status orange"><BookOpenText size={18}/></div>
-              <div className="task-details">
-                <span className="task-name">Globalization Essay</span>
-                <span className="task-course">Advanced Geography</span>
-              </div>
-              <ChevronRight size={18} className="text-muted" />
-            </div>
-
-            <div className="task-item">
-              <div className="task-icon-status purple"><Target size={18}/></div>
-              <div className="task-details">
-                <span className="task-name">Management Quiz</span>
-                <span className="task-course">Product Management</span>
-              </div>
-              <ChevronRight size={18} className="text-muted" />
-            </div>
+            {upcomingTasks.length > 0 ? (
+              upcomingTasks.map((task, idx) => (
+                <div className="task-item" key={idx}>
+                  <div className={`task-icon-status ${task.type === 'session' ? 'orange' : 'purple'}`}>
+                    {task.type === 'session' ? <Mic size={18}/> : <Target size={18}/>}
+                  </div>
+                  <div className="task-details">
+                    <span className="task-name">{task.title}</span>
+                    <span className="task-course">{task.courseCode} • {new Date(task.sortDate).toLocaleDateString()}</span>
+                  </div>
+                  <ChevronRight size={18} className="text-muted" />
+                </div>
+              ))
+            ) : (
+              <p className="text-muted">No upcoming tasks.</p>
+            )}
           </div>
         </div>
       </div>

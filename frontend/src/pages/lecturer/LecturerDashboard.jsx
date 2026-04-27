@@ -282,7 +282,36 @@ const LecturerDashboard = () => {
     }
   };
 
+  // --- HELPER: Get Initials ---
+  const getInitials = (name) => {
+    if (!name) return "L";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-danger" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!lecturerInfo) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="text-center">
+          <h3>Session Expired</h3>
+          <p>Please log in again to access the dashboard.</p>
+          <button className="btn btn-danger" onClick={handleLogout}>Go to Login</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
+
     <div className="lecturer-container">
       
       {/* SIDEBAR */}
