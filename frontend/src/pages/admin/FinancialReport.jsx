@@ -325,7 +325,7 @@ const FinancialReport = () => {
                                         <td>{payment.method}</td>
                                         <td>
                                             {payment.receiptUrl ? (
-                                                <a href={payment.receiptUrl.includes(".pdf") ? payment.receiptUrl.replace(/\.pdf$/i, ".jpg") : payment.receiptUrl}
+                                                <a href={payment.receiptUrl.startsWith('/uploads') ? `http://localhost:8000${payment.receiptUrl}` : payment.receiptUrl}
                                                     target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary" style={{ padding: '2px 8px', fontSize: '12px' }}>
                                                     View Receipt
                                                 </a>

@@ -10,6 +10,16 @@ const Courses = () => {
   const [step, setStep] = useState(1);
   const [enrollmentData, setEnrollmentData] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [receiptFile, setReceiptFile] = useState(null);
+
+  // Get logged-in user info to pre-fill enrollment
+  const userInfo = (() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('trioslk_userInfo') || '{}');
+    } catch {
+      return {};
+    }
+  })();
 
   useEffect(() => {
     const fetchLiveCourses = async () => {
@@ -29,7 +39,7 @@ const Courses = () => {
       fullName: data.get('fullName'),
       email: data.get('email'),
       phone: data.get('phone'),
-      studentId: data.get('studentId') || 'New Student',
+      studentId: data.get('studentId') || userInfo?.studentId || 'New Student',
     });
     setStep(2);
   };
@@ -49,15 +59,20 @@ const Courses = () => {
       formData.append('status', 'Pending');
       
       if (method === 'Bank Transfer') {
-        const receiptFile = data.get('receipt');
         if (receiptFile) {
           formData.append('receipt', receiptFile);
+        } else {
+          alert('Please upload a payment receipt.');
+          return;
         }
       }
 
-      await api.post('/payments', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.post('/payments', formData);
+      
+      if (!response.data) {
+        throw new Error('Payment failed: No data returned');
+      }
+
       alert('Enrollment and payment submitted successfully!');
       
       const modalElement = document.getElementById('enrollmentModal');
@@ -68,7 +83,8 @@ const Courses = () => {
       setEnrollmentData(null);
     } catch (error) {
       console.error(error);
-      alert('Payment failed');
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message;
+      alert(`Payment failed: ${errorMsg}`);
     }
   };
 
@@ -152,12 +168,12 @@ const Courses = () => {
               
               {step === 1 ? (
                 <form onSubmit={proceedToPayment}>
-                  <div className="mb-3"><label className="form-label fw-medium text-muted small">Full Name</label><input type="text" name="fullName" className="form-control" placeholder="Enter your full name" required /></div>
+                  <div className="mb-3"><label className="form-label fw-medium text-muted small">Full Name</label><input type="text" name="fullName" className="form-control" placeholder="Enter your full name" defaultValue={userInfo?.name || ''} required /></div>
                   <div className="row mb-3">
-                    <div className="col-md-6"><label className="form-label fw-medium text-muted small">Email Address</label><input type="email" name="email" className="form-control" placeholder="name@example.com" required /></div>
+                    <div className="col-md-6"><label className="form-label fw-medium text-muted small">Email Address</label><input type="email" name="email" className="form-control" placeholder="name@example.com" defaultValue={userInfo?.email || ''} required /></div>
                     <div className="col-md-6 mt-3 mt-md-0"><label className="form-label fw-medium text-muted small">Phone Number</label><input type="tel" name="phone" className="form-control" placeholder="07XXXXXXXX" required /></div>
                   </div>
-                  <div className="mb-4"><label className="form-label fw-medium text-muted small">Student ID (If applicable)</label><input type="text" name="studentId" className="form-control" placeholder="e.g. STU001" /><div className="form-text">Leave blank if you are a new student.</div></div>
+                  <div className="mb-4"><label className="form-label fw-medium text-muted small">Student ID (If applicable)</label><input type="text" name="studentId" className="form-control" placeholder="e.g. STU-1001" defaultValue={userInfo?.studentId || ''} /><div className="form-text">Leave blank if you are a new student.</div></div>
                   <button type="submit" className="btn btn-theme-red w-100 py-2 fw-bold">Proceed to Payment <i className="bi bi-arrow-right ms-2"></i></button>
                 </form>
               ) : (
@@ -214,7 +230,18 @@ const Courses = () => {
                           Upload Payment Receipt (PDF)
                         </label>
                         <div className="file-upload-wrapper">
-                          <input type="file" name="receipt" accept=".pdf" className="form-control file-input-custom" required />
+                          <input 
+                            type="file" 
+                            name="receipt" 
+                            accept=".pdf" 
+                            className="form-control file-input-custom" 
+                            required 
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                    setReceiptFile(e.target.files[0]);
+                                }
+                            }}
+                          />
                           <div className="form-text text-muted small mt-2">
                              Max file size: 5MB. Only PDF accepted.
                           </div>

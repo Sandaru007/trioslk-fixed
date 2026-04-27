@@ -26,9 +26,24 @@ exports.getPaymentById = async (req, res) => {
 // Create payment
 exports.createPayment = async (req, res) => {
   try {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const debugInfo = {
+      time: new Date().toISOString(),
+      headers: req.headers,
+      body: req.body,
+      file: req.file,
+      files: req.files
+    };
+    
+    fs.writeFileSync(path.join(__dirname, '..', 'debug_payment.json'), JSON.stringify(debugInfo, null, 2));
+
     const paymentData = { ...req.body };
-    if (req.file) {
-      paymentData.receiptUrl = req.file.path; // Set by Cloudinary
+    const uploadedFile = (req.files && req.files.length > 0) ? req.files[0] : req.file;
+
+    if (uploadedFile) {
+      paymentData.receiptUrl = uploadedFile.filename ? `/uploads/${uploadedFile.filename}` : (uploadedFile.path || uploadedFile.secure_url || uploadedFile.url); 
     }
 
     // Auto-generate STU-XXXX if not provided or is New Student
@@ -70,9 +85,18 @@ exports.createPayment = async (req, res) => {
 
     const payment = new Payment(paymentData);
     await payment.save();
-    res.status(201).json(payment);
+    res.status(201).json({
+      payment,
+      debugFiles: req.files ? req.files.length : 0,
+      debugBody: req.body
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating payment', error: error.message });
+    console.error("CREATE PAYMENT ERROR:", error);
+    res.status(500).json({ 
+      message: 'Error creating payment', 
+      error: error.message,
+      stack: error.stack
+    });
   }
 };
 

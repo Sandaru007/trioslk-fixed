@@ -19,8 +19,8 @@ const Login = () => {
       const { data } = await api.post('/auth/login', credentials);
       
       // Store token and user data in browser storage
-      localStorage.setItem('trioslk_token', data.token);
-      localStorage.setItem('trioslk_userInfo', JSON.stringify(data));
+      sessionStorage.setItem('trioslk_token', data.token);
+      sessionStorage.setItem('trioslk_userInfo', JSON.stringify(data));
 
       // Route based on backend role
       if (data.role === 'admin') {

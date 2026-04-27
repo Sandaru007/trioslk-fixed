@@ -1,16 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GraduationCap, MapPin, MessageSquare, Mic, BookOpenText, Target, ChevronRight, Search } from 'lucide-react';
+import api from '../../services/api';
 
 const DashboardHome = () => {
   // Get the logged-in user's name from localStorage
   const userInfo = (() => {
     try {
-      return JSON.parse(localStorage.getItem('trioslk_userInfo') || '{}');
+      return JSON.parse(sessionStorage.getItem('trioslk_userInfo') || '{}');
     } catch {
       return {};
     }
   })();
   const firstName = userInfo.name ? userInfo.name.split(' ')[0] : 'Student';
+  const studentId = userInfo.studentId;
+
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!studentId) return;
+      try {
+        const response = await api.get(`/students/${encodeURIComponent(studentId)}/courses`);
+        setEnrolledCourses(response.data);
+      } catch (error) {
+        console.error('Error fetching enrolled courses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [studentId]);
 
   // Static data matching the image for now
   const dates = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -38,41 +59,30 @@ const DashboardHome = () => {
           </div>
           
           <div className="courses-grid">
-            {/* Course 1 */}
-            <div className="course-item-card">
-              <div className="course-icon-container purple">
-                <MapPin size={40} strokeWidth={1.5}/>
-              </div>
-              <h5>Product Management</h5>
-              <span className="course-instructor">Prof. Jennifer Gomez</span>
-              <div className="course-progress-bar">
-                <div className="progress-fill" style={{ width: '80%' }}></div>
-              </div>
-            </div>
-
-            {/* Course 2 */}
-            <div className="course-item-card">
-              <div className="course-icon-container orange">
-                <MapPin size={40} strokeWidth={1.5} />
-              </div>
-              <h5>Advanced Geography</h5>
-              <span className="course-instructor">Prof. Jennifer Gomez</span>
-              <div className="course-progress-bar">
-                <div className="progress-fill" style={{ width: '60%' }}></div>
-              </div>
-            </div>
-
-            {/* Course 3 */}
-            <div className="course-item-card">
-              <div className="course-icon-container pink">
-                <Mic size={40} strokeWidth={1.5} />
-              </div>
-              <h5>Mass Communication</h5>
-              <span className="course-instructor">Prof. Jennifer Gomez</span>
-              <div className="course-progress-bar">
-                <div className="progress-fill" style={{ width: '40%' }}></div>
-              </div>
-            </div>
+            {loading ? (
+              <p>Loading courses...</p>
+            ) : enrolledCourses.length > 0 ? (
+              enrolledCourses.map((course, index) => {
+                // Determine icon color based on index
+                const colors = ['purple', 'orange', 'pink', 'blue', 'green'];
+                const colorClass = colors[index % colors.length];
+                
+                return (
+                  <div className="course-item-card" key={course._id || index}>
+                    <div className={`course-icon-container ${colorClass}`}>
+                      <BookOpenText size={40} strokeWidth={1.5} />
+                    </div>
+                    <h5>{course.title || 'Course Title'}</h5>
+                    <span className="course-instructor">Status: Active</span>
+                    <div className="course-progress-bar">
+                      <div className="progress-fill bg-primary" style={{ width: '0%' }}></div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p>You have not enrolled in any courses yet.</p>
+            )}
           </div>
         </div>
 
