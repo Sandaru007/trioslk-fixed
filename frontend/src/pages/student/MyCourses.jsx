@@ -2,8 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { PlayCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 
-// Fallback images if needed
+// Fallback images
 import englishImg from '../../assets/images/english-c.jpg';
+import eventImg from '../../assets/images/event-c.jpg';
+import fashionImg from '../../assets/images/fashion-c.jpg';
+
+const getCourseImage = (imageUrl) => {
+  if (imageUrl) {
+    // Check if it's a base64 data URI or an absolute HTTP URL
+    if (imageUrl.startsWith('data:image') || imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // Otherwise, assume it's a relative path on the backend server
+    return `http://localhost:8000${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  }
+  return englishImg; // Fallback
+};
 
 const MyCourses = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -51,7 +65,7 @@ const MyCourses = () => {
               <div className="lms-card d-flex flex-column flex-md-row overflow-hidden p-0">
                 <div style={{ width: '100%', maxWidth: '280px', flexShrink: 0, borderRadius: '20px 0 0 20px', overflow: 'hidden' }}>
                   <img 
-                    src={course.imageUrl ? (course.imageUrl.startsWith('http') ? course.imageUrl : `http://localhost:8000${course.imageUrl.startsWith('/') ? '' : '/'}${course.imageUrl}`) : englishImg} 
+                    src={getCourseImage(course.imageUrl)} 
                     alt={course.title} 
                     style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: '200px' }} 
                   />

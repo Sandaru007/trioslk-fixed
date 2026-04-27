@@ -1,29 +1,29 @@
 {
-  "time": "2026-04-27T10:55:18.048Z",
+  "time": "2026-04-27T17:12:01.390Z",
   "headers": {
     "host": "localhost:8000",
     "connection": "keep-alive",
-    "content-length": "70271",
+    "content-length": "70287",
     "sec-ch-ua-platform": "\"Windows\"",
-    "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZTdjM2FhODcxYTEzZmYzNmQ0NjRiNSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzc3Mjg3MjY2LCJleHAiOjE3Nzk4NzkyNjZ9.jxaZ7oQsRPj1wukn6hXuq80J1UVh_Ra5NBMJwNmTZjk",
+    "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZTdjM2FhODcxYTEzZmYzNmQ0NjRiNSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzc3MzAyNTExLCJleHAiOjE3Nzk4OTQ1MTF9.ocXcUydQ9WUqtZjdUz18axSVvjmxnp6GMDJhEtsG7nE",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/147.0.0.0",
     "accept": "application/json, text/plain, */*",
     "sec-ch-ua": "\"Microsoft Edge\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
-    "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryXIZc7ufHo5EgFvOX",
+    "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryDByZ9eCzVgAJwJ6b",
     "sec-ch-ua-mobile": "?0",
-    "origin": "http://localhost:5173",
+    "origin": "http://localhost:5174",
     "sec-fetch-site": "same-site",
     "sec-fetch-mode": "cors",
     "sec-fetch-dest": "empty",
-    "referer": "http://localhost:5173/",
+    "referer": "http://localhost:5174/",
     "accept-encoding": "gzip, deflate, br, zstd",
     "accept-language": "en-US,en;q=0.9"
   },
   "body": {
     "studentId": "STU-1012",
     "studentName": "Kavishka Shenal",
-    "courseId": "69e5b4344ccc9714b87566c2",
-    "courseTitle": "Audio Engineering",
+    "courseId": "69c244457fba5de03ac5f48a",
+    "courseTitle": "Spoken English Certificate Course",
     "amount": "15000",
     "method": "Bank Transfer",
     "status": "Pending"
@@ -34,8 +34,8 @@
     "encoding": "7bit",
     "mimetype": "application/pdf",
     "destination": "C:\\Users\\User\\Documents\\GitHub\\trioslk-fixed\\backend\\uploads",
-    "filename": "receipt-1777287318008-533798490.pdf",
-    "path": "C:\\Users\\User\\Documents\\GitHub\\trioslk-fixed\\backend\\uploads\\receipt-1777287318008-533798490.pdf",
+    "filename": "receipt-1777309921377-595948165.pdf",
+    "path": "C:\\Users\\User\\Documents\\GitHub\\trioslk-fixed\\backend\\uploads\\receipt-1777309921377-595948165.pdf",
     "size": 69324
   }
 }
