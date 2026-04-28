@@ -1,12 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path'); // <-- Moved to the top with the other imports
 const connectDB = require('./config/db');
-
 
 // Load environment variables (Do this before importing routes!)
 dotenv.config();
-
 
 // Connect to Database
 connectDB();
@@ -24,16 +23,17 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const assignmentRoutes = require('./routes/assignmentRoutes');
 
 const app = express();
-
-const path = require('path');
 
 // --- Middleware ---
 app.use(cors());
 app.use(express.json()); // Allows us to send/receive JSON
 app.use(express.urlencoded({ extended: true })); // <-- NEW: Crucial for parsing FormData and files!
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploads folder
+
+// Serve uploads folder (Only need this once!)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- API Endpoints (shows the server where to send specific requests.) ---
 app.use('/api/employees', employeeRoutes);
@@ -48,6 +48,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/assignments', assignmentRoutes);
 
 app.get('/', (req, res) => {
   res.send('TrioSLK API is running...');

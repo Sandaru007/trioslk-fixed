@@ -13,10 +13,10 @@ const uploadMaterial = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded by Multer!' });
     }
 
-    // Cloudinary URL
-    const fileUrl = req.file.path; 
-    console.log("--- 2. CLOUDINARY UPLOAD SUCCESS ---");
-    console.log("Cloudinary URL:", fileUrl);
+    // Local URL
+    const fileUrl = `/uploads/materials/${req.file.filename}`; 
+    console.log("--- 2. UPLOAD SUCCESS ---");
+    console.log("File URL:", fileUrl);
 
     if (!title || !courseCode) {
       console.log("--- UPLOAD FAILED: Missing Text Fields ---");
@@ -52,4 +52,13 @@ const getMaterialsByCourse = async (req, res) => {
   }
 };
 
-module.exports = { uploadMaterial, getMaterialsByCourse };
+const getAllMaterials = async (req, res) => {
+  try {
+    const materials = await Material.find().sort({ createdAt: -1 });
+    res.status(200).json(materials);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching materials', error: error.message });
+  }
+};
+
+module.exports = { uploadMaterial, getMaterialsByCourse, getAllMaterials };

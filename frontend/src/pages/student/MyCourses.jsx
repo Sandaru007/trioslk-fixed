@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, CheckCircle } from 'lucide-react';
+import { PlayCircle, CheckCircle, Video, Calendar, Clock, Film, FileText } from 'lucide-react';
 import api from '../../services/api';
 
 // Fallback images
@@ -20,38 +20,119 @@ const getCourseImage = (imageUrl) => {
 };
 
 const MyCourses = () => {
-  const [enrolledCourses, setEnrolledCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const userInfo = (() => {
-    try {
-      return JSON.parse(sessionStorage.getItem('trioslk_userInfo') || '{}');
-    } catch {
-      return {};
-    }
-  })();
-  const studentId = userInfo.studentId;
+  const [sessions, setSessions] = useState([]);
+  const [materials, setMaterials] = useState([]);
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      if (!studentId) return;
+    const fetchData = async () => {
       try {
-        const response = await api.get(`/students/${encodeURIComponent(studentId)}/courses`);
-        setEnrolledCourses(response.data);
-      } catch (error) {
-        console.error('Error fetching enrolled courses:', error);
-      } finally {
-        setLoading(false);
+        const resSessions = await api.get('/sessions');
+        setSessions(resSessions.data || []);
+        
+        const resMaterials = await api.get('/materials');
+        setMaterials(resMaterials.data || []);
+      } catch (err) {
+        console.error("Error fetching data", err);
       }
     };
+    fetchData();
+  }, []);
 
-    fetchCourses();
-  }, [studentId]);
+  const handleJoinZoom = async (session) => {
+    try {
+      await api.put(`/sessions/${session._id}/attendance`, {
+        userId: 'dummy-student-id', // Dummy student ID
+        userRole: 'Student'
+      });
+    } catch (err) {
+      console.error("Attendance error", err);
+    }
+    // Open link anyway
+    window.open(session.meetingLink, '_blank');
+  };
 
   return (
     <div className="animate__animated animate__fadeIn">
       
-      {/* Header */}
+      {/* --- SESSIONS AND RECORDINGS SECTION --- */}
+      {sessions.length > 0 && (
+        <div className="mb-5">
+          <div className="card-header-inline mb-4">
+            <h3 className="fw-bold m-0" style={{color: 'var(--text-main)'}}><Video size={24} className="me-2 text-danger"/>Live Sessions & Recordings</h3>
+          </div>
+          <div className="row g-3">
+            {sessions.map(session => (
+              <div key={session._id} className="col-md-6 col-lg-4">
+                <div className="card border-0 shadow-sm p-4 h-100 modern-card">
+                  <h6 className="fw-bold text-dark mb-1">{session.title}</h6>
+                  <p className="text-muted small mb-3">Course: {session.courseCode}</p>
+                  
+                  <div className="d-flex gap-3 small fw-medium text-dark mb-4">
+                    <span className="d-flex align-items-center gap-1"><Calendar size={14}/> {session.date}</span>
+                    <span className="d-flex align-items-center gap-1"><Clock size={14}/> {session.time}</span>
+                  </div>
+
+                  <div className="mt-auto d-flex flex-column gap-2">
+                    {session.meetingLink && !session.videoUrl && (
+                      <button 
+                        className="btn btn-primary btn-sm rounded-pill fw-bold"
+                        onClick={() => handleJoinZoom(session)}
+                      >
+                        Join Zoom Meeting
+                      </button>
+                    )}
+                    {session.videoUrl && (
+                      <a 
+                        href={`http://localhost:8000${session.videoUrl}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="btn btn-outline-danger btn-sm rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
+                      >
+                        <Film size={16}/> Watch Recording
+                      </a>
+                    )}
+                    {!session.meetingLink && !session.videoUrl && (
+                      <span className="badge bg-light text-muted w-100 py-2 rounded-pill">Link Pending</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* --- COURSE MATERIALS SECTION --- */}
+      {materials.length > 0 && (
+        <div className="mb-5">
+          <div className="card-header-inline mb-4">
+            <h3 className="fw-bold m-0" style={{color: 'var(--text-main)'}}><FileText size={24} className="me-2 text-danger"/>Course Materials</h3>
+          </div>
+          <div className="row g-3">
+            {materials.map(mat => (
+              <div key={mat._id} className="col-md-6 col-lg-4">
+                <div className="card border-0 shadow-sm p-4 h-100 modern-card d-flex flex-column justify-content-between">
+                  <div>
+                    <h6 className="fw-bold text-dark mb-1">{mat.title}</h6>
+                    <p className="text-muted small mb-2">Course: {mat.courseCode}</p>
+                    <p className="text-muted small mb-3">Added {new Date(mat.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <a 
+                    href={mat.fileUrl?.startsWith('http') ? mat.fileUrl : `http://localhost:8000${mat.fileUrl}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="btn btn-outline-primary btn-sm rounded-pill fw-bold w-100 mt-2"
+                  >
+                    View Material
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Header - Aligned with Diane's UI style */}
       <div className="card-header-inline mb-4">
         <h3 className="fw-bold m-0" style={{color: 'var(--text-main)'}}>My Learning</h3>
       </div>
