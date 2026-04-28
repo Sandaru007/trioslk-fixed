@@ -87,12 +87,11 @@ const getEnrolledCourses = async (req, res) => {
   try {
     const studentId = req.params.id; // STU-XXXX
     const studentIdStr = studentId.trim();
-    // Find payments for this student that are 'Completed'
+    // Find payments for this student (Pending OR Completed counts as enrolled)
     const payments = await Payment.find({ 
-      studentId: new RegExp(`^${studentIdStr}$`, 'i'), 
-      status: 'Completed' 
+      studentId: new RegExp(`^${studentIdStr}$`, 'i')
     }).populate('courseId');
-    console.log(`Found ${payments.length} completed payments for ${studentId}`);
+    console.log(`Found ${payments.length} payments for ${studentId}`);
     
     // Extract unique courses
     const Course = require('../models/Course');

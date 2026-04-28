@@ -3,6 +3,14 @@ import api from '../../services/api';
 import { Trash2, PlusCircle, Edit, Calendar, BookOpen, XCircle, Users, CheckCircle, Clock } from 'lucide-react';
 import './AdminDashboard.css';
 
+// Available course images (stored as a key in DB, resolved to real image on frontend)
+const COURSE_IMAGE_OPTIONS = [
+  { key: 'english',  label: 'Spoken English',     previewColor: '#fce7f3', emoji: '🗣️' },
+  { key: 'fashion',  label: 'Fashion Design',      previewColor: '#fef3c7', emoji: '👗' },
+  { key: 'event',    label: 'Event Management',    previewColor: '#dcfce7', emoji: '🎪' },
+  { key: 'courses',  label: 'General / Other',     previewColor: '#e0f2fe', emoji: '📚' },
+];
+
 const EventManagement = () => {
   const [activeTab, setActiveTab] = useState('events'); 
   const [events, setEvents] = useState([]);
@@ -328,7 +336,32 @@ const EventManagement = () => {
               </div>
               <input type="text" placeholder="Short Description" value={courseForm.shortDesc} onChange={(e) => setCourseForm({...courseForm, shortDesc: e.target.value})} required style={inputStyle} />
               <textarea placeholder="Full Description" value={courseForm.fullDesc} onChange={(e) => setCourseForm({...courseForm, fullDesc: e.target.value})} required rows="3" style={inputStyle} />
-              <input type="text" placeholder="Image URL" value={courseForm.imageUrl} onChange={(e) => setCourseForm({...courseForm, imageUrl: e.target.value})} required style={inputStyle} />
+              {/* Image Picker — pick from available course images */}
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#64748b', display: 'block', marginBottom: '8px' }}>Course Image</label>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  {COURSE_IMAGE_OPTIONS.map(opt => (
+                    <label key={opt.key} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                      padding: '12px 16px', borderRadius: '10px', cursor: 'pointer',
+                      border: courseForm.imageUrl === opt.key ? '2px solid #4318ff' : '2px solid #e0e5f2',
+                      background: courseForm.imageUrl === opt.key ? '#eef2ff' : opt.previewColor,
+                      transition: 'all 0.15s ease', minWidth: '100px'
+                    }}>
+                      <input
+                        type="radio" name="courseImage" value={opt.key}
+                        checked={courseForm.imageUrl === opt.key}
+                        onChange={() => setCourseForm({...courseForm, imageUrl: opt.key})}
+                        style={{ display: 'none' }}
+                      />
+                      <span style={{ fontSize: '28px' }}>{opt.emoji}</span>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: '#374151', textAlign: 'center' }}>{opt.label}</span>
+                      {courseForm.imageUrl === opt.key && <span style={{ fontSize: '11px', color: '#4318ff', fontWeight: 'bold' }}>✓ Selected</span>}
+                    </label>
+                  ))}
+                </div>
+                {!courseForm.imageUrl && <p style={{ color: '#e11d48', fontSize: '12px', marginTop: '6px' }}>Please select an image.</p>}
+              </div>
               <select value={courseForm.status} onChange={(e) => setCourseForm({...courseForm, status: e.target.value})} style={inputStyle}>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>

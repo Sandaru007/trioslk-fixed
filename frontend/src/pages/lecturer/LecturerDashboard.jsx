@@ -282,6 +282,32 @@ const LecturerDashboard = () => {
     }
   };
 
+  // Helper: get initials from a full name
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  // Guard: show spinner while loading OR if redirect is happening
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#f8f9fa' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner-border text-danger" role="status" style={{ width: '3rem', height: '3rem' }}></div>
+          <p style={{ marginTop: '16px', color: '#6c757d', fontWeight: 600 }}>Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!lecturerInfo) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <p style={{ color: '#6c757d' }}>Unable to load profile. Please <a href="/login">log in again</a>.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="lecturer-container">
       

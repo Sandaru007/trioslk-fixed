@@ -67,15 +67,18 @@ const DashboardHome = () => {
                 const colors = ['purple', 'orange', 'pink', 'blue', 'green'];
                 const colorClass = colors[index % colors.length];
                 
+                const isPending = course.paymentStatus && course.paymentStatus !== 'Completed';
                 return (
                   <div className="course-item-card" key={course._id || index}>
                     <div className={`course-icon-container ${colorClass}`}>
                       <BookOpenText size={40} strokeWidth={1.5} />
                     </div>
                     <h5>{course.title || 'Course Title'}</h5>
-                    <span className="course-instructor">Status: Active</span>
+                    <span className="course-instructor" style={{ color: isPending ? '#f59e0b' : '#10b981', fontWeight: 600 }}>
+                      {isPending ? '⏳ Payment Pending Approval' : '✅ Active'}
+                    </span>
                     <div className="course-progress-bar">
-                      <div className="progress-fill bg-primary" style={{ width: '0%' }}></div>
+                      <div className="progress-fill bg-primary" style={{ width: isPending ? '0%' : '5%' }}></div>
                     </div>
                   </div>
                 );

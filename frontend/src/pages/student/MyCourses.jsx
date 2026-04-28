@@ -1,13 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { PlayCircle, CheckCircle, Video, Calendar, Clock, Film, FileText } from 'lucide-react';
+import { PlayCircle, Video, Calendar, Clock, Film, FileText } from 'lucide-react';
 import api from '../../services/api';
 
-// Fallback images if needed
-import englishImg from '../../assets/images/english-c.jpg';
+// Course-specific images
+import englishImg   from '../../assets/images/english-c.jpg';
+import fashionImg   from '../../assets/images/fashion-c.jpg';
+import eventImg     from '../../assets/images/event-c.jpg';
+import coursesImg   from '../../assets/images/courses.jpg';
+
+// Image key → actual imported image (matches what admin saves in DB)
+const IMAGE_KEY_MAP = {
+  english: englishImg,
+  fashion: fashionImg,
+  event:   eventImg,
+  courses: coursesImg,
+};
+
+// Resolves a course's imageUrl (key OR old URL) to the correct image
+const getCourseImage = (imageUrl = '', title = '') => {
+  // 1. If it's one of our known short keys saved by the admin picker
+  if (IMAGE_KEY_MAP[imageUrl]) return IMAGE_KEY_MAP[imageUrl];
+
+  // 2. If it's a real external URL (http/https), use it directly
+  if (imageUrl.startsWith('http')) return imageUrl;
+
+  // 3. Fallback: guess from the course title keywords
+  const t = title.toLowerCase();
+  if (t.includes('english') || t.includes('spoken'))   return englishImg;
+  if (t.includes('fashion') || t.includes('design'))   return fashionImg;
+  if (t.includes('event')   || t.includes('management')) return eventImg;
+
+  return coursesImg; // final generic fallback
+};
 
 const MyCourses = () => {
   const [sessions, setSessions] = useState([]);
   const [materials, setMaterials] = useState([]);
+
+  // --- Enrolled courses state ---
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Get logged-in student info
+  const userInfo = (() => {
+    try { return JSON.parse(sessionStorage.getItem('trioslk_userInfo') || '{}'); }
+    catch { return {}; }
+  })();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,6 +60,25 @@ const MyCourses = () => {
       }
     };
     fetchData();
+  }, []);
+
+  // Fetch enrolled courses for this student
+  useEffect(() => {
+    const fetchEnrolled = async () => {
+      const studentId = userInfo.studentId;
+      if (!studentId) { setLoading(false); return; }
+      try {
+        setLoading(true);
+        const res = await api.get(`/students/${encodeURIComponent(studentId)}/courses`);
+        setEnrolledCourses(res.data || []);
+      } catch (err) {
+        console.error("Error fetching enrolled courses", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEnrolled();
+  // eslint-disable-next-line
   }, []);
 
   const handleJoinZoom = async (session) => {
@@ -132,8 +189,9 @@ const MyCourses = () => {
               <div className="lms-card d-flex flex-column flex-md-row overflow-hidden p-0">
                 <div style={{ width: '100%', maxWidth: '280px', flexShrink: 0, borderRadius: '20px 0 0 20px', overflow: 'hidden' }}>
                   <img 
-                    src={course.imageUrl ? (course.imageUrl.startsWith('http') ? course.imageUrl : `http://localhost:8000${course.imageUrl.startsWith('/') ? '' : '/'}${course.imageUrl}`) : englishImg} 
-                    alt={course.title} 
+                    src={getCourseImage(course.imageUrl || '', course.title || '')}
+                    alt={course.title}
+                    onError={(e) => { e.target.onerror = null; e.target.src = coursesImg; }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', minHeight: '200px' }} 
                   />
                 </div>
@@ -142,7 +200,9 @@ const MyCourses = () => {
                   <div className="d-flex justify-content-between align-items-start mb-2">
                     <div>
                       <h4 className="fw-bold mb-1" style={{color: 'var(--text-main)'}}>{course.title}</h4>
-                      <p className="small fw-medium mb-3" style={{color: 'var(--text-muted)'}}>Status: Active</p>
+                      <p className="small fw-medium mb-3" style={{color: course.paymentStatus === 'Completed' ? '#10b981' : '#f59e0b', fontWeight: 600}}>
+                        {course.paymentStatus === 'Completed' ? '✅ Active' : '⏳ Payment Pending Approval'}
+                      </p>
                     </div>
                     <span className="badge bg-primary text-white rounded-pill px-3 py-2 d-flex align-items-center gap-1">
                       <PlayCircle size={14}/> In Progress
@@ -168,8 +228,8 @@ const MyCourses = () => {
         ) : (
           <div className="col-12">
             <div className="lms-card p-4 text-center">
-              <h5 className="text-muted">You have no approved enrollments yet.</h5>
-              <p className="small text-muted">Courses will appear here once your payment is approved by the admin.</p>
+              <h5 className="text-muted">You haven't enrolled in any courses yet.</h5>
+              <p className="small text-muted">Visit our <a href="/courses">Courses page</a> to explore and enroll in a course.</p>
             </div>
           </div>
         )}
